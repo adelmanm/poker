@@ -10,7 +10,7 @@ public class Simulator
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations = 100000;
+			num_iterations =1000000;
 		}
 		else 
 		{
@@ -25,7 +25,7 @@ public class Simulator
 			for (int player=0;player < NUM_PLAYERS;player++)
 			{
 				HistoryNode h = new HistoryNode(NUM_PLAYERS, MAX_ACTIONS);
-				utility = trainer.cfr(h,player,iteration,1.0f,1.0f);
+				utility = trainer.cfr(h,player,iteration,1.0,1.0);
 				//update average utility history
 				if (iteration == 0) {
 					utilHist[player][iteration] = utility;
@@ -33,9 +33,6 @@ public class Simulator
 				else {
 					utilHist[player][iteration] = (utilHist[player][iteration-1] * (iteration - 1) + utility) / iteration;
 				}
-				//System.out.print("Itration utility:");
-				//System.out.println(utility);
-				//trainer.print();
 			}
 		}
 		trainer.print();
