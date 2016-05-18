@@ -10,8 +10,8 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 	
 	 HistoryNode(int num_players, int max_actions)
 	 {
-		 	NUM_PLAYERS= num_players;
-			MAX_ACTIONS=max_actions ;
+		 	NUM_PLAYERS = num_players;
+			MAX_ACTIONS = max_actions ;
 			// memory - we need to save cards and decisions.
 			int[] cards={0,0};
 			String decisions="";
@@ -60,7 +60,7 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 	@Override 
 	public Outcome get_decision_outcome(int outcome_num) //Decision node
 	{
-		Outcome outcome=new Outcome(); 
+		Outcome_Class outcome=new Outcome_Class(); 
 		if (outcome_num==0)
 				outcome.appendOutcome('P');
 		else outcome.appendOutcome('B');
@@ -68,14 +68,15 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 	}
 
 	@Override 
-	public Outcome sample_outcome() // Chance node
+	public Outcome sample_outcome(int iteration) // Chance node
 	{
 		int player=this.get_player();
 		if (player==0) // the cards are dealt once. 
-		{	int[] allCards={1,2,3};
+		{	   	
+			int[] allCards={1,2,3};
 			Random random = new Random();
 			for (int c1 = allCards.length - 1; c1 > 0; c1--) //shuffling
-			{
+			{		
 				int c2 = random.nextInt(c1 + 1);
 				int tmp = allCards[c1];
 				allCards[c1] = allCards[c2];
@@ -83,8 +84,9 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 			}
 			cards[0]=allCards[0];
 			cards[1]=allCards[1];
+			
 		}
-		Outcome outcome= new Outcome();
+		Outcome_Class outcome = new Outcome_Class();
 		outcome.appendOutcome(cards[player]);
 		return outcome;
 	
@@ -112,8 +114,8 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 		HistoryNode new_history= new HistoryNode(NUM_PLAYERS, MAX_ACTIONS);
 		new_history.cards=cards;
 		new_history.decisions=decisions;
-		if 	(!Character.isDigit(a.getOutcome()))		
-			new_history.decisions+=a.getOutcome();
+		if 	(!Character.isDigit(((Outcome_Class)a).getOutcome()))		
+			new_history.decisions+=((Outcome_Class)a).getOutcome();
 		return new_history;
 	}
 
