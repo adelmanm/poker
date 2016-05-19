@@ -11,7 +11,7 @@ public class TrainCFR {
 		
 		//Sample chance outcome for chance states
 		else if (h.is_chance()) {
-			Outcome a = ((ChanceNode)h).sample_outcome(iteration);
+			Outcome a = ((ChanceNode)h).sample_outcome();
 			if (player == 0){
 				return cfr(h.append(a), player, iteration, pi0, pi1);
     		}
