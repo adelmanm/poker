@@ -1,8 +1,32 @@
-/*
- *  Interface for Outcome. an Outcome can be the result of a chance event or a player action.
- *  Outcomes can be appended to History (game state) to produce a new future state. 
- */
 
-public interface Outcome {
-	int to_int(); //Outcome should be convertible to an array index 
+public class Outcome {
+	char outcome;
+	int to_int() 
+	{
+		if (Character.isLetter(outcome)== false )		// if it's a card
+			return (int)(Character.getNumericValue(outcome)); 
+		switch (outcome)
+		{
+			case 'c': return 0;
+			case 'b': return 1;
+			case 'F': return 2;
+			case 'C': return 3;
+			case 'R': return 4;
+		}
+		
+		return -1;
+	};
+	void setOutcome(char o)
+	{
+		outcome=o;
+	};
+	void setOutcome(int o)
+	{
+		outcome=(char)(o+'0');
+	};
+	
+	char getOutcome()
+	{
+		return outcome;
+	}
 }
