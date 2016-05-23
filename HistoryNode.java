@@ -68,7 +68,7 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 	}
 
 	@Override 
-	public Outcome sample_outcome(int iteration) // Chance node
+	public Outcome sample_outcome() // Chance node
 	{
 		int player=this.get_player();
 		if (player==0) // the cards are dealt once. 
@@ -92,6 +92,28 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 	
 	}
 
+	@Override 
+	public int num_chance_outcomes()
+	{
+		return 6;
+	}
+	
+	public Outcome get_chance_outcome(int outcome_num)
+	{
+		int[][] cards_combination = {{1,2},{1,3},{2,3},{2,1},{3,1},{3,2}};
+		int player=this.get_player();
+		if (player==0) // the cards are dealt once.
+			cards = cards_combination[outcome_num];
+		Outcome_Class outcome = new Outcome_Class();
+		outcome.appendOutcome(cards[player]);
+		return outcome;
+	}
+	
+	public double get_chance_outcome_probability(int outcome_num)
+	{
+		return 1.0/6.0;
+	}
+	
 	@Override 
 	public boolean is_terminal() //History
 	{
