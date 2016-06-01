@@ -86,7 +86,7 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 	@Override 
 	public Outcome get_decision_outcome(int outcome_num) //Decision node
 	{
-		Outcome outcome=new Outcome(); 
+		Outcome_Class outcome=new Outcome_Class(); 
 		switch (outcome_num)
 		{
 			case 0: outcome.setOutcome('c'); break;
@@ -116,12 +116,35 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 			cards[1]=allCards[1];
 			cards[2]=allCards[2]; //flop
 		}
-		Outcome outcome= new Outcome();
+		Outcome_Class outcome= new Outcome_Class();
 		outcome.setOutcome(cards[player]);
 		return outcome;
 	
 	}
 
+	@Override 
+	public int num_chance_outcomes()
+	{
+		return 48;
+	}
+	
+	public Outcome get_chance_outcome(int outcome_num)
+	{
+		int[][] cards_combination = {{1,1,2},{1,2,1},{2,1,1},{1,1,3},{1,3,1},{3,1,1},{2,2,1},{2,1,2},{1,2,2},{2,2,3},{2,3,2},{3,2,2},{3,3,1},{3,1,3},{1,3,3},{3,3,2},{3,2,3},{2,3,3}};
+		int player=this.get_player();
+		if (player==0) // the cards are dealt once.
+			cards = cards_combination[outcome_num];
+		Outcome_Class outcome = new Outcome_Class();
+		outcome.setOutcome(cards[player]);
+		return outcome;
+	}
+	
+	public double get_chance_outcome_probability(int outcome_num)
+	{
+		return 1.0/48.0;
+		
+	}
+	
 	@Override 
 	public boolean is_terminal() //History
 	{
