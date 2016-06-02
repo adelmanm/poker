@@ -15,11 +15,11 @@ public class Outcome_Class implements Outcome {
 					return (int)(Character.getNumericValue(outcome));
 		return -1;
 	};
-	void appendOutcome(char o)
+	void setOutcome(char o)
 	{
 		outcome=o;
 	};
-	void appendOutcome(int o)
+	void setOutcome(int o)
 	{
 		outcome=(char)(o+'0');
 	};

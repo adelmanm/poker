@@ -97,5 +97,6 @@ public class TrainCFR_Vanilla {
 	         String filename =  log_dir_path + "infosets.csv";
 	         CsvWriter.write(filename, me.getKey().toString());  
 	      }
+	    CsvWriter.flush();
 	}
 }
