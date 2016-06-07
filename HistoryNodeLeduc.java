@@ -23,38 +23,44 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	{
 		if (this.is_terminal()) 
 		{
-			int pay_off_sum=2;
-			int pay_off=0;
+			//int pay_off_sum=2;
+			double[] player_bets = {1.0,1.0}; //both players start the game with a bet of 1  
+			int betting_player;
+			double pay_off=0.0;
 			boolean is_player_card_higher= cards[player]>cards[1-player]; //for two players
 			boolean does_player_card_match= cards[player]==cards[2]; //for two players
 			char curr_char=' ';
 			for (int i=0; i<decisions.length(); i++)
 			{
+				if ( (i>=3) && (decisions.charAt(2)=='C') ) // the indices run from 0 to l-1.
+					betting_player =  1-(i%2);
+				else
+					betting_player =  i%2 ;
 				curr_char= decisions.charAt(i);
 				switch (curr_char)
 				{
-					case 'b': pay_off_sum+=1; break;
-					case 'C': pay_off_sum+=1; break;
-					case 'R': pay_off_sum+=2; break;
-					default : pay_off_sum+=0; break;
+					case 'b': player_bets[betting_player] +=1.0; break;
+					case 'C': player_bets[betting_player] +=1.0; break;
+					case 'R': player_bets[betting_player] +=2.0; break;
+					default : break;
 				}
 			}
 			if (decisions.endsWith("F")) 
 			{
-				pay_off= (player==this.get_player()) ? -(pay_off_sum/2) : (pay_off_sum/2) ; // it's important to divide an integer. 
-				return (double)pay_off;
+				int finishing_player = 1-get_player(); //get_player() returns the player whose turn is now, so invert it to get the player who played the last turn
+				pay_off = (player==finishing_player) ? -player_bets[player] : player_bets[1-player]; //the folding player loses his bets 
+				return pay_off;
 			}
-			if (decisions.endsWith("cc"))
+			if (cards[player] == cards[1-player]) { //there's a tie, players split the pot so no one profits
+				return 0.0;
+			}
+			if ( (cards[player]==cards[2]) || (cards[1-player]==cards[2]) ) //one of the players matches the flop
 			{
-				return (double)0;
+				pay_off = does_player_card_match ? player_bets[1-player] : -player_bets[player] ;
+				return pay_off;
 			}
-			if ( (cards[player]==cards[2]) || (cards[1-player]==cards[2]) )
-			{
-				pay_off= does_player_card_match ? (pay_off_sum/2) : -(pay_off_sum/2) ;
-				return (double)pay_off;
-			}
-			pay_off= is_player_card_higher ? (pay_off_sum/2) : -(pay_off_sum/2) ;
-			return (double)pay_off;
+			pay_off = is_player_card_higher ? player_bets[1-player] : -player_bets[player] ; //the player with the higher card wins
+			return pay_off;
 		}
 		return 0.0;
 	}
@@ -150,8 +156,10 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	public boolean is_terminal() //History
 	{
 		if (decisions=="") return false;
-		if ( (decisions.endsWith("F")) || (decisions.endsWith("cc")) ) return true;
-		if ( ((decisions.endsWith("bC")) || (decisions.endsWith("RC")) ) && (decisions.length()>=4) )return true;
+		if (decisions.endsWith("F")) return true;
+		if (decisions.endsWith("cc") && decisions.length()>= 4) return true; // "cc" is terminal in the 2nd round only
+		if (decisions.endsWith("RC") && decisions.length()> 4) return true; // C is terminal in the 2nd round only (length>4 because cbRC is not terminal)
+		if (decisions.endsWith("bC") && decisions.length()>= 4) return true; // C is terminal in the 2nd round only (length>=4 because bCbC is terminal)
 		return false;
 	}
 
@@ -178,7 +186,7 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	{
 		int player= this.get_player();
 		String infoset="";
-		if ( (decisions.lastIndexOf('b')>2) || (decisions.lastIndexOf('c')>2) ) // post flop
+		if ( (decisions.lastIndexOf('b')>=2) || (decisions.lastIndexOf('c')>=2) ) // post flop
 			infoset= String.valueOf(cards[player])+ String.valueOf(cards[2])+ decisions; 
 		else
 			infoset= String.valueOf(cards[player])+ decisions;

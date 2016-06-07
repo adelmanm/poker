@@ -6,7 +6,8 @@ public class SimulatorLeduc
 	public static final int NUM_PLAYERS = 2;
 	public static final int MAX_ACTIONS = 5;
 	public static final String log_dir_path = "logs/";
-	public static final int ITERAION_GAP = 1;
+	public static final int ITERAION_GAP = 100;
+	public static final boolean UPDATE_STRATEGY_CSV = true;
 	
 	public static void main(String[] args) // function Solve in the algorithm.
 	{
@@ -15,7 +16,7 @@ public class SimulatorLeduc
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations =100;
+			num_iterations =100000;
 		}
 		else 
 		{
@@ -35,7 +36,9 @@ public class SimulatorLeduc
 			}
 			if (iteration % ITERAION_GAP == 0) {
 				//System.out.println("iterations passed: " + iteration);
-				trainer.update_strategy_csv(log_dir_path);
+				if (UPDATE_STRATEGY_CSV == true) {
+					trainer.update_strategy_csv(log_dir_path);
+				}
 				for (int j=0;j<NUM_PLAYERS;j++){
 					utility_avg[j] = utility[j] / (iteration+1);
 				}
