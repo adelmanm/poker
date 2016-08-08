@@ -2,15 +2,15 @@ import java.util.Random;
 public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, TerminalNode 
 {
 	int NUM_PLAYERS ;
-	int MAX_ACTIONS ;
+	int TOTAL_GAME_ACTIONS ;
 	// memory - we need to save cards and decisions.
 	int[] cards={0,0,0}; //P1, P2, flop.
 	String decisions="";
 	
-	 HistoryNodeLeduc(int num_players, int max_actions)
+	 HistoryNodeLeduc(int num_players, int total_game_actions)
 	 {
 		 	NUM_PLAYERS= num_players;
-			MAX_ACTIONS=max_actions ;
+			TOTAL_GAME_ACTIONS=total_game_actions ;
 			// memory - we need to save cards and decisions.
 			int[] cards={0,0,0}; //P1, P2, flop. 
 			String decisions="";
@@ -66,7 +66,7 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	}
 
 	@Override 
-	public int num_actions() //Decision node
+	public int num_valid_actions() //Decision node
 	{
 		if (decisions=="") return 2;
 		if (decisions.endsWith("b")) return 3;
@@ -74,9 +74,9 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	}
 	
 	@Override 
-	public int max_actions() //Decision node
+	public int total_game_actions() //Decision node
 	{
-		return MAX_ACTIONS;
+		return TOTAL_GAME_ACTIONS;
 	}
 	
 	@Override 
@@ -173,7 +173,7 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	@Override 
 	public History append(Outcome a) //History
 	{
-		HistoryNodeLeduc new_history= new HistoryNodeLeduc(NUM_PLAYERS, MAX_ACTIONS);
+		HistoryNodeLeduc new_history= new HistoryNodeLeduc(NUM_PLAYERS, TOTAL_GAME_ACTIONS);
 		new_history.cards=cards;
 		new_history.decisions=decisions;
 		if 	(!Character.isDigit(((Outcome_Class)a).getOutcome()))		
@@ -186,7 +186,7 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	{
 		int player= this.get_player();
 		String infoset="";
-		if ( (decisions.lastIndexOf('b')>=2) || (decisions.lastIndexOf('c')>=2) ) // post flop
+		if (post_flop()) // post flop
 			infoset= String.valueOf(cards[player])+ String.valueOf(cards[2])+ decisions; 
 		else
 			infoset= String.valueOf(cards[player])+ decisions;
@@ -198,10 +198,20 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	{
 		if (decisions=="") return 0;
 		int l=decisions.length();
-		if ( (l>=4) && (decisions.charAt(2)=='C') ) // the indices run from 0 to l-1.
+		if ( (l>=3) && (decisions.charAt(2)=='C') ) // the indices run from 0 to l-1.
 			return 1-(l%2);
 		else
 			return l%2 ;
+	}
+	
+	public boolean post_flop()
+	{
+		if ( decisions.contains("C") || (decisions.lastIndexOf('b')>=2) || (decisions.lastIndexOf('c')>=1) ) {
+			return true;
+		}
+		else {
+			return false;
+		}		
 	}
 
 }

@@ -50,6 +50,7 @@ public class CsvFileWriter {
 	            e.printStackTrace();
 	        }  		             	
     }
+	
 	public void write (String filename ,String infoset){
     	final String NEW_LINE_SEPARATOR = "\n";
     	
@@ -66,6 +67,29 @@ public class CsvFileWriter {
 	            System.out.println("Error in CsvFileWriter !!!");
 	            e.printStackTrace();
 	        }     		             	
+    }
+	
+	public void write (String filename ,String infoset, double[] strategy){
+    	final String COMMA_DELIMITER = ",";
+    	final String NEW_LINE_SEPARATOR = "\n";
+    	
+    	BufferedWriter bw = nodemap.get(filename);
+    	try {
+	    	if (bw == null) {
+				bw = new BufferedWriter(new FileWriter(filename, true));
+				nodemap.put(filename, bw);
+			}
+	    	bw.append(infoset);
+	    	bw.append(COMMA_DELIMITER);
+            for (int i=0;i<strategy.length;i++){
+            	bw.append(String.format("%.3f",strategy[i]));
+            	bw.append(COMMA_DELIMITER);
+            }
+            bw.append(NEW_LINE_SEPARATOR);         
+	        } catch (Exception e) {
+	            System.out.println("Error in CsvFileWriter !!!");
+	            e.printStackTrace();
+	        }  		             	
     }
 	
 	public void flush_close() {

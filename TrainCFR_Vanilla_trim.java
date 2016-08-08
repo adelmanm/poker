@@ -1,8 +1,7 @@
-/* Implementation of the CFR algorithm - Chance Sampling version */
-
+/* Implementation of the CFR algorithm - Vanilla version */
 import java.util.*;
-public class TrainCFR_CS {
-	private TreeMap<String,CFRNode> nodemap = new TreeMap<String,CFRNode>(); //<key, information set data>
+public class TrainCFR_Vanilla_trim {
+	private TreeMap<String,CFRNode_trim> nodemap = new TreeMap<String,CFRNode_trim>(); //<key, information set data>
 	static CsvFileWriter CsvWriter = new CsvFileWriter();
 	
 	public double cfr(History h, int player, int iteration, double pi0, double pi1) {
@@ -13,23 +12,33 @@ public class TrainCFR_CS {
 		
 		//Sample chance outcome for chance states
 		else if (h.is_chance()) {
-			Outcome a = ((ChanceNode)h).sample_outcome();
-			if (player == 0){
-				return cfr(h.append(a), player, iteration, pi0, pi1);
-    		}
-     		else if(player == 1){
-     			return cfr(h.append(a), player, iteration, pi0, pi1);
-     		}	
+			ChanceNode h_chance = (ChanceNode)h;
+			int num_outcomes = h_chance.num_chance_outcomes();
+			double util = 0.0;
+			for (int i=0;i<num_outcomes;i++){
+				Outcome a = h_chance.get_chance_outcome(i);
+				double prob =h_chance.get_chance_outcome_probability(i);
+				if (player == 0)
+					 util += prob*cfr(h.append(a), player, iteration, pi0, pi1*prob);
+				else if (player == 1)
+					util += prob*cfr(h.append(a), player, iteration, pi0*prob, pi1);
+			}
+			return util;		
 		}
 		
 		//Get information set node or create if nonexistant
 		DecisionNode h_decision = (DecisionNode)h;
 		int total_game_actions = h_decision.total_game_actions();
 		String infoset_key = h_decision.get_information_set();
-		CFRNode infoset_node = nodemap.get(infoset_key);
+		CFRNode_trim infoset_node = nodemap.get(infoset_key);
 		if (infoset_node == null) {
-			infoset_node = new CFRNode(h_decision);
+			infoset_node = new CFRNode_trim(h_decision);
 			nodemap.put(infoset_key, infoset_node);
+		}
+		
+		//if the utility is stable, return the mean utility
+		if (infoset_node.can_trim(player)) {
+			return infoset_node.get_mean(player);
 		}
 		
 		//For each action, recursively call cfr with additional history and probability
@@ -55,6 +64,7 @@ public class TrainCFR_CS {
 				infoset_node.updateTables(player,a,regret,pi0,pi1);
 			}
 		}
+		infoset_node.updateUtility(total_node_utility,player);
 		return total_node_utility;
 	}
 
@@ -66,7 +76,7 @@ public class TrainCFR_CS {
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
 	         System.out.print(me.getKey() + ": ");
-	         CFRNode tmpNode=(CFRNode)me.getValue();
+	         CFRNode_trim tmpNode=(CFRNode_trim)me.getValue();
 	         tmpNode.Print();
 	      }
 	}
@@ -77,7 +87,7 @@ public class TrainCFR_CS {
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
-	         CFRNode tmpNode=(CFRNode)me.getValue();
+	         CFRNode_trim tmpNode=(CFRNode_trim)me.getValue();
 	         String filename =  log_dir_path + me.getKey() + "_strategy.csv";
 	         double strategy[] = tmpNode.getAverageStrategy();
 	         CsvWriter.write(filename, strategy);
@@ -93,6 +103,6 @@ public class TrainCFR_CS {
 	         String filename =  log_dir_path + "infosets.csv";
 	         CsvWriter.write(filename, me.getKey().toString());  
 	      }
-	    CsvWriter.flush_close();
+	    CsvWriter.flush();
 	}
 }

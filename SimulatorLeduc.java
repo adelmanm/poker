@@ -4,10 +4,10 @@ import java.io.File;
 public class SimulatorLeduc  
 {
 	public static final int NUM_PLAYERS = 2;
-	public static final int MAX_ACTIONS = 5;
+	public static final int TOTAL_GAME_ACTIONS = 5;
 	public static final String log_dir_path = "logs/";
-	public static final int ITERAION_GAP = 100;
-	public static final boolean UPDATE_STRATEGY_CSV = true;
+	public static final int ITERAION_GAP = 1000;
+	public static final boolean UPDATE_STRATEGY_CSV = false;
 	
 	public static void main(String[] args) // function Solve in the algorithm.
 	{
@@ -16,7 +16,7 @@ public class SimulatorLeduc
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations =100000;
+			num_iterations =1000000;
 		}
 		else 
 		{
@@ -31,18 +31,18 @@ public class SimulatorLeduc
 		{
 			for (int player=0;player < NUM_PLAYERS;player++)
 			{
-				HistoryNodeLeduc h = new HistoryNodeLeduc(NUM_PLAYERS, MAX_ACTIONS);
+				HistoryNodeLeduc h = new HistoryNodeLeduc(NUM_PLAYERS, TOTAL_GAME_ACTIONS);
 				utility[player] += trainer.cfr(h,player,iteration,1.0,1.0);
 			}
 			if (iteration % ITERAION_GAP == 0) {
-				//System.out.println("iterations passed: " + iteration);
+				System.out.println("iterations passed: " + iteration);
 				if (UPDATE_STRATEGY_CSV == true) {
 					trainer.update_strategy_csv(log_dir_path);
+					for (int j=0;j<NUM_PLAYERS;j++){
+						utility_avg[j] = utility[j] / (iteration+1);
+					}
+					CsvWriter.write(log_dir_path + "util_hist.csv", utility_avg);
 				}
-				for (int j=0;j<NUM_PLAYERS;j++){
-					utility_avg[j] = utility[j] / (iteration+1);
-				}
-				CsvWriter.write(log_dir_path + "util_hist.csv", utility_avg);
 			}
 			
 		}

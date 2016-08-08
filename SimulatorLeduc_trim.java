@@ -1,12 +1,12 @@
 import java.util.*;
 import java.io.File;
 
-public class SimulatorKuhn  
+public class SimulatorLeduc_trim  
 {
 	public static final int NUM_PLAYERS = 2;
-	public static final int TOTAL_GAME_ACTIONS = 2;
+	public static final int MAX_ACTIONS = 5;
 	public static final String log_dir_path = "logs/";
-	public static final int ITERAION_GAP = 1;
+	public static final int ITERAION_GAP = 1000;
 	public static final boolean UPDATE_STRATEGY_CSV = false;
 	
 	public static void main(String[] args) // function Solve in the algorithm.
@@ -16,14 +16,14 @@ public class SimulatorKuhn
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations =5000;
+			num_iterations =100000;
 		}
 		else 
 		{
 			num_iterations = Integer.valueOf(args[0]);
 		}
 		System.out.format("num_iterations is %d\n",num_iterations);
-		TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
+		TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim();
 		//TrainCFR_CS trainer= new TrainCFR_CS();
 		double utility[] = new double[NUM_PLAYERS];
 		double utility_avg[] = new double[NUM_PLAYERS];
@@ -31,18 +31,18 @@ public class SimulatorKuhn
 		{
 			for (int player=0;player < NUM_PLAYERS;player++)
 			{
-				HistoryNodeKuhn h = new HistoryNodeKuhn(NUM_PLAYERS, TOTAL_GAME_ACTIONS);
+				HistoryNodeLeduc h = new HistoryNodeLeduc(NUM_PLAYERS, MAX_ACTIONS);
 				utility[player] += trainer.cfr(h,player,iteration,1.0,1.0);
 			}
 			if (iteration % ITERAION_GAP == 0) {
 				System.out.println("iterations passed: " + iteration);
 				if (UPDATE_STRATEGY_CSV == true) {
 					trainer.update_strategy_csv(log_dir_path);
-					for (int j=0;j<NUM_PLAYERS;j++){
-						utility_avg[j] = utility[j] / (iteration+1);
-					}
-					CsvWriter.write(log_dir_path + "util_hist.csv", utility_avg);
 				}
+				for (int j=0;j<NUM_PLAYERS;j++){
+					utility_avg[j] = utility[j] / (iteration+1);
+				}
+				CsvWriter.write(log_dir_path + "util_hist.csv", utility_avg);
 			}
 			
 		}
