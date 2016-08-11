@@ -21,7 +21,8 @@ public class PlayLeduc
 		read_infosets();
 		player = get_player();
 		rounds = get_rounds();
-		for (int i=0; i<rounds; i++){
+		for (int i=1; i<=rounds; i++){
+			System.out.println("Round " + i + ":");
 			play_round();
 		}
 		check_winner();
@@ -58,7 +59,7 @@ public class PlayLeduc
 		catch (Exception e) {
 			rounds_number_int = -1;
 		}
-		while (rounds_number_int < 0) {
+		while (rounds_number_int <= 0) {
 			System.out.println("Invalid rounds number. Please try again: ");
 			rounds_number_str = reader.next(); // Scans the next token of the input as an int.
 			try {
@@ -157,11 +158,11 @@ public class PlayLeduc
 		String infoset = h_decision.get_information_set();
 		double[] strategy = strategy_profile.get(infoset);
 		double rnd = Math.random();
-		double cum_strategy = 0.0;
+		double cum_probability = 0.0;
 		for (int a=0 ; a<strategy.length; a++){
-			cum_strategy += strategy[a];
-			//System.out.println("a is " + a + " rnd is" + rnd + " cum_strategy is " + cum_strategy);
-			if (rnd < cum_strategy) {
+			cum_probability += strategy[a];
+			//System.out.println("a is " + a + " rnd is" + rnd + " cum_probability is " + cum_probability);
+			if (rnd < cum_probability) {
 				assert (h_decision.action_valid(a));
 				return h_decision.get_decision_outcome(a);
 			}

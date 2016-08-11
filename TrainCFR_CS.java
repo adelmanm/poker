@@ -34,8 +34,8 @@ public class TrainCFR_CS {
 		
 		//For each action, recursively call cfr with additional history and probability
 		double [] node_utility = new double[total_game_actions];
-		double total_node_utility = 0.0f;
-		double [] strategy = infoset_node.getStrategy();
+		double total_node_utility = 0.0;
+		double [] strategy = infoset_node.getStrategy(iteration);
 		for (int a=0; a < total_game_actions; a++){
 			if (h_decision.action_valid(a) == false) continue;
 			if (h_decision.get_player() == 0) {
@@ -52,7 +52,7 @@ public class TrainCFR_CS {
 			for (int a=0; a < total_game_actions; a++){
 				if (h_decision.action_valid(a) == false) continue;
 				double regret = node_utility[a]-total_node_utility;
-				infoset_node.updateTables(player,a,regret,pi0,pi1);
+				infoset_node.updateTables(player,a,regret,pi0,pi1,iteration);
 			}
 		}
 		return total_node_utility;
@@ -89,9 +89,11 @@ public class TrainCFR_CS {
 		Set set = nodemap.entrySet();
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
-	         Map.Entry me = (Map.Entry)i.next();
+	    	Map.Entry me = (Map.Entry)i.next();
+	         CFRNode tmpNode = (CFRNode)me.getValue();
+	         double strategy[] = tmpNode.getAverageStrategy();
 	         String filename =  log_dir_path + "infosets.csv";
-	         CsvWriter.write(filename, me.getKey().toString());  
+	         CsvWriter.write(filename, me.getKey().toString(), strategy);
 	      }
 	    CsvWriter.flush_close();
 	}

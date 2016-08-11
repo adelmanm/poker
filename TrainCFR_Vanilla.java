@@ -10,7 +10,7 @@ public class TrainCFR_Vanilla {
 			return ((TerminalNode)h).get_utility(player);// this actually means "get_payoff", since it doesn't include probabilities (algorithm part)
 		}
 		
-		//Sample chance outcome for chance states
+		//Go over all chance outcomes for chance states
 		else if (h.is_chance()) {
 			ChanceNode h_chance = (ChanceNode)h;
 			int num_outcomes = h_chance.num_chance_outcomes();
@@ -38,8 +38,8 @@ public class TrainCFR_Vanilla {
 		
 		//For each action, recursively call cfr with additional history and probability
 		double [] node_utility = new double[total_game_actions];
-		double total_node_utility = 0.0f;
-		double [] strategy = infoset_node.getStrategy();
+		double total_node_utility = 0.0;
+		double [] strategy = infoset_node.getStrategy(iteration);
 		for (int a=0; a < total_game_actions; a++){
 			if (h_decision.action_valid(a) == false) continue;
 			if (h_decision.get_player() == 0) {
@@ -56,7 +56,7 @@ public class TrainCFR_Vanilla {
 			for (int a=0; a < total_game_actions; a++){
 				if (h_decision.action_valid(a) == false) continue;
 				double regret = node_utility[a]-total_node_utility;
-				infoset_node.updateTables(player,a,regret,pi0,pi1);
+				infoset_node.updateTables(player,a,regret,pi0,pi1,iteration);
 			}
 		}
 		return total_node_utility;

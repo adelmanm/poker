@@ -16,7 +16,7 @@ public class SimulatorLeduc_trim
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations =100000;
+			num_iterations =1000000;
 		}
 		else 
 		{
