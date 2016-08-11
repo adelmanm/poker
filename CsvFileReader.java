@@ -1,10 +1,6 @@
 import java.io.FileReader;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 public class CsvFileReader {
@@ -24,6 +20,7 @@ public class CsvFileReader {
 				}
 				strategy_profile.put(infoset, strategy);
 			}
+	    	br.close();
     	}
     	 catch (IOException  e) {
 	        System.out.println("CsvReader: Error in reading " + filename);

@@ -82,7 +82,7 @@ public class CsvFileWriter {
 	    	bw.append(infoset);
 	    	bw.append(COMMA_DELIMITER);
             for (int i=0;i<strategy.length;i++){
-            	bw.append(String.format("%.3f",strategy[i]));
+            	bw.append(String.format("%f",strategy[i]));
             	bw.append(COMMA_DELIMITER);
             }
             bw.append(NEW_LINE_SEPARATOR);         

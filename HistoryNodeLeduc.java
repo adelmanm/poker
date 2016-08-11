@@ -23,16 +23,15 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	{
 		if (this.is_terminal()) 
 		{
-			//int pay_off_sum=2;
 			double[] player_bets = {1.0,1.0}; //both players start the game with a bet of 1  
 			int betting_player;
 			double pay_off=0.0;
 			boolean is_player_card_higher= cards[player]>cards[1-player]; //for two players
-			boolean does_player_card_match= cards[player]==cards[2]; //for two players
+			boolean is_player_card_match_flop= cards[player]==cards[2]; //for two players
 			char curr_char=' ';
 			for (int i=0; i<decisions.length(); i++)
 			{
-				if ( (i>=3) && (decisions.charAt(2)=='C') ) // the indices run from 0 to l-1.
+				if ((i>=3) && (decisions.charAt(2)=='C')) // the indices run from 0 to l-1.
 					betting_player =  1-(i%2);
 				else
 					betting_player =  i%2 ;
@@ -56,7 +55,7 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 			}
 			if ( (cards[player]==cards[2]) || (cards[1-player]==cards[2]) ) //one of the players matches the flop
 			{
-				pay_off = does_player_card_match ? player_bets[1-player] : -player_bets[player] ;
+				pay_off = is_player_card_match_flop ? player_bets[1-player] : -player_bets[player] ;
 				return pay_off;
 			}
 			pay_off = is_player_card_higher ? player_bets[1-player] : -player_bets[player] ; //the player with the higher card wins
@@ -132,12 +131,12 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	@Override 
 	public int num_chance_outcomes()
 	{
-		return 18;
+		return 24;
 	}
 	
 	public Outcome get_chance_outcome(int outcome_num)
 	{
-		int[][] cards_combination = {{1,1,2},{1,2,1},{2,1,1},{1,1,3},{1,3,1},{3,1,1},{2,2,1},{2,1,2},{1,2,2},{2,2,3},{2,3,2},{3,2,2},{3,3,1},{3,1,3},{1,3,3},{3,3,2},{3,2,3},{2,3,3}};
+		int[][] cards_combination = {{1,1,2},{1,2,1},{2,1,1},{1,1,3},{1,3,1},{3,1,1},{2,2,1},{2,1,2},{1,2,2},{2,2,3},{2,3,2},{3,2,2},{3,3,1},{3,1,3},{1,3,3},{3,3,2},{3,2,3},{2,3,3},{1,2,3},{1,3,2},{2,1,3},{2,3,1},{3,1,2},{3,2,1}};
 		int player=this.get_player();
 		if (player==0) // the cards are dealt once.
 			cards = cards_combination[outcome_num];
@@ -148,7 +147,11 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	
 	public double get_chance_outcome_probability(int outcome_num)
 	{
-		return 1.0/18.0;
+		assert(outcome_num >= 0 && outcome_num < 24);
+		if (outcome_num < 18)
+			return 1.0/30.0;
+		else
+			return 1.0/15.0;
 		
 	}
 	
@@ -198,7 +201,7 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	{
 		if (decisions=="") return 0;
 		int l=decisions.length();
-		if ( (l>=3) && (decisions.charAt(2)=='C') ) // the indices run from 0 to l-1.
+		if ((l>=3) && (decisions.charAt(2)=='C')) // the indices run from 0 to l-1.
 			return 1-(l%2);
 		else
 			return l%2 ;
@@ -206,7 +209,7 @@ public class HistoryNodeLeduc implements History, ChanceNode, DecisionNode, Term
 	
 	public boolean post_flop()
 	{
-		if ( decisions.contains("C") || (decisions.lastIndexOf('b')>=2) || (decisions.lastIndexOf('c')>=1) ) {
+		if ( decisions.contains("C") || (decisions.lastIndexOf('c')>=1) ) {
 			return true;
 		}
 		else {

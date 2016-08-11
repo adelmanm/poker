@@ -43,8 +43,8 @@ public class TrainCFR_Vanilla_trim {
 		
 		//For each action, recursively call cfr with additional history and probability
 		double [] node_utility = new double[total_game_actions];
-		double total_node_utility = 0.0f;
-		double [] strategy = infoset_node.getStrategy();
+		double total_node_utility = 0.0;
+		double [] strategy = infoset_node.getStrategy(iteration);
 		for (int a=0; a < total_game_actions; a++){
 			if (h_decision.action_valid(a) == false) continue;
 			if (h_decision.get_player() == 0) {
@@ -61,7 +61,7 @@ public class TrainCFR_Vanilla_trim {
 			for (int a=0; a < total_game_actions; a++){
 				if (h_decision.action_valid(a) == false) continue;
 				double regret = node_utility[a]-total_node_utility;
-				infoset_node.updateTables(player,a,regret,pi0,pi1);
+				infoset_node.updateTables(player,a,regret,pi0,pi1,iteration);
 			}
 		}
 		infoset_node.updateUtility(total_node_utility,player);

@@ -6,7 +6,7 @@ public class SimulatorLeduc
 	public static final int NUM_PLAYERS = 2;
 	public static final int TOTAL_GAME_ACTIONS = 5;
 	public static final String log_dir_path = "logs/";
-	public static final int ITERAION_GAP = 1000;
+	public static final int ITERAION_GAP = 1;
 	public static final boolean UPDATE_STRATEGY_CSV = false;
 	
 	public static void main(String[] args) // function Solve in the algorithm.
