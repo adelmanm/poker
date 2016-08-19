@@ -4,9 +4,8 @@ INFOSETS_PATH = 'logs\infosets.csv';
 LOGS_PATH = 'logs\';
 %% plot informtion sets strategies - Kuhn
 ITERATION_GAP = 1;
-infoset_file = fopen(INFOSETS_PATH);
-infosets = textscan(infoset_file, '%s %*f %*f %*f %*f', 'delimiter', ',');
-fclose(infoset_file);
+[~,~,raw]=xlsread(INFOSETS_PATH);
+infosets=raw(:,1);
 N = length(infosets);
 
 infoset_legend={0};
@@ -16,8 +15,11 @@ title('Player 1 bet strategies');
 xlabel('iterations');
 ylabel('strategy');
 for i = 1:N
-    strategy_path = strcat(LOGS_PATH,infosets{1,i},'_strategy.csv');
-    strategy_data = importdata(strategy_path{1});
+    if isnumeric(infosets{i})
+        infosets{i}=num2str(infosets{i});
+    end
+    strategy_path = strcat(LOGS_PATH,infosets{i},'_strategy.csv');
+    strategy_data = importdata(strategy_path);
     iterations = (1:size(strategy_data,1)).*ITERATION_GAP;
     if length(infosets{i})==2
         infoset_legend{end+1}=infosets{i};
@@ -34,7 +36,7 @@ title('Player 0 bet strategies');
 xlabel('iterations');
 ylabel('strategy');
 for i = 1:N
-    strategy_path = strcat(LOGS_PATH,infosets{1,i},'_strategy.csv');
+    strategy_path = strcat(LOGS_PATH,infosets(i),'_strategy.csv');
     strategy_data = importdata(strategy_path{1});
     iterations = (1:size(strategy_data,1)).*ITERATION_GAP;
     if length(infosets{i})~=2
@@ -45,7 +47,7 @@ for i = 1:N
 end
 legend(infoset_legend{2:end});
 %% plot player utilities 
-ITERATION_GAP = 1; % 1 for Kuhn, 100 for Leduc
+ITERATION_GAP = 100; % 1 for Kuhn, 100 for Leduc
 util_path = strcat(LOGS_PATH,'util_hist.csv');
 util_data = importdata(util_path);
 figure(i+1);
