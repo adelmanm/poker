@@ -3,7 +3,7 @@ close all;
 INFOSETS_PATH = 'logs\infosets.csv';
 LOGS_PATH = 'logs\';
 %% plot informtion sets strategies
-ITERATION_GAP = 50;
+ITERATION_GAP = 1;
 infosets = textread(INFOSETS_PATH, '%s', 'delimiter', '\n');
 N = length(infosets);
 for i = 1:N
@@ -16,7 +16,7 @@ for i = 1:N
     ylabel('strategy');
     iterations = (1:size(strategy_data,1)).*ITERATION_GAP;
     plot(iterations,strategy_data,'LineWidth',1,'Marker','.','MarkerSize',20);
-    legend('pass','bet');
+    legend('check','bet','call','fold','raise');
     drawnow;
     
 end

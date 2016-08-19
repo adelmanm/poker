@@ -1,17 +1,17 @@
 import java.util.Objects;
 import java.util.Random;
-public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalNode 
+public class HistoryNodeKuhn implements History, ChanceNode, DecisionNode, TerminalNode 
 {
-	int NUM_PLAYERS ;
-	int MAX_ACTIONS ;
+	int NUM_PLAYERS;
+	int TOTAL_GAME_ACTIONS;
 	// memory - we need to save cards and decisions.
 	int[] cards={0,0};
 	String decisions="";
 	
-	 HistoryNode(int num_players, int max_actions)
+	HistoryNodeKuhn(int num_players, int total_game_actions)
 	 {
 		 	NUM_PLAYERS = num_players;
-			MAX_ACTIONS = max_actions ;
+		 	TOTAL_GAME_ACTIONS = total_game_actions ;
 			// memory - we need to save cards and decisions.
 			int[] cards={0,0};
 			String decisions="";
@@ -40,15 +40,15 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 	}
 
 	@Override 
-	public int num_actions() //Decision node
+	public int num_valid_actions() //Decision node
 	{
-		return MAX_ACTIONS;
+		return TOTAL_GAME_ACTIONS;
 	}
 	
 	@Override 
-	public int max_actions() //Decision node
+	public int total_game_actions() //Decision node
 	{
-		return MAX_ACTIONS;
+		return TOTAL_GAME_ACTIONS;
 	}
 	
 	@Override 
@@ -62,8 +62,8 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 	{
 		Outcome_Class outcome=new Outcome_Class(); 
 		if (outcome_num==0)
-				outcome.appendOutcome('P');
-		else outcome.appendOutcome('B');
+				outcome.setOutcome('P');
+		else outcome.setOutcome('B');
 		return outcome;
 	}
 
@@ -87,7 +87,7 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 			
 		}
 		Outcome_Class outcome = new Outcome_Class();
-		outcome.appendOutcome(cards[player]);
+		outcome.setOutcome(cards[player]);
 		return outcome;
 	
 	}
@@ -105,7 +105,7 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 		if (player==0) // the cards are dealt once.
 			cards = cards_combination[outcome_num];
 		Outcome_Class outcome = new Outcome_Class();
-		outcome.appendOutcome(cards[player]);
+		outcome.setOutcome(cards[player]);
 		return outcome;
 	}
 	
@@ -133,12 +133,17 @@ public class HistoryNode implements History, ChanceNode, DecisionNode, TerminalN
 	@Override 
 	public History append(Outcome a) //History
 	{
-		HistoryNode new_history= new HistoryNode(NUM_PLAYERS, MAX_ACTIONS);
+		HistoryNodeKuhn new_history= new HistoryNodeKuhn(NUM_PLAYERS, TOTAL_GAME_ACTIONS);
 		new_history.cards=cards;
 		new_history.decisions=decisions;
 		if 	(!Character.isDigit(((Outcome_Class)a).getOutcome()))		
 			new_history.decisions+=((Outcome_Class)a).getOutcome();
 		return new_history;
+	}
+	
+	public void append_overwrite(Outcome a) //History
+	{	
+		decisions+=((Outcome_Class)a).getOutcome();
 	}
 
 	@Override 

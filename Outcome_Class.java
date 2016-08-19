@@ -1,19 +1,18 @@
+
 public class Outcome_Class implements Outcome {
 	char outcome;
-	
-	public int to_int()
+	public int to_int() 
 	{
-		if (Character.isLetter(outcome)== false )		// if it's a card
-			return (int)(Character.getNumericValue(outcome)); 
-		switch (outcome)
-		{
-			case 'c': return 0;
-			case 'b': return 1;
-			case 'F': return 2;
-			case 'C': return 3;
-			case 'R': return 4;
-		}
-		
+		//if outcome.isLetter() 
+		//return outcome.getNumericValue();
+		if (outcome=='P')
+				return 0;
+		else
+			if (outcome=='B')
+					return 1;
+			else
+				if (Character.isLetter(outcome)== false )
+					return (int)(Character.getNumericValue(outcome));
 		return -1;
 	};
 	void setOutcome(char o)
@@ -25,7 +24,7 @@ public class Outcome_Class implements Outcome {
 		outcome=(char)(o+'0');
 	};
 	
-	public char getOutcome()
+	char getOutcome()
 	{
 		return outcome;
 	}

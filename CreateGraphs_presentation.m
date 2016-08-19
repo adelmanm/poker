@@ -1,7 +1,7 @@
 clear all;
 close all;
-INFOSETS_PATH = '..\logs\infosets.csv';
-LOGS_PATH = '..\logs\';
+INFOSETS_PATH = 'logs\infosets.csv';
+LOGS_PATH = 'logs\';
 %% plot informtion sets strategies - Kuhn
 ITERATION_GAP = 1;
 [~,~,raw]=xlsread(INFOSETS_PATH);

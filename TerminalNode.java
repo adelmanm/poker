@@ -1,3 +1,7 @@
+/*
+ *  interface for game terminal nodes 
+ */
+
 public interface TerminalNode extends History {
-	float get_utility(int player);
+	double get_utility(int player); //returns the utility/payoff of the terminal game state
 }
