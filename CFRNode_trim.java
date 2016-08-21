@@ -10,13 +10,12 @@ public class CFRNode_trim {
 	private final int iteration_mod = 3; //has to be at least 2 to allow updating only for the next iteration
 	private int current_iteration_mod_pointer = 0;
 	private double[][] utility_history;
-	public static final int UTILITY_HISTORY_LENGTH = 100;
-	public static final double CUTOFF_THRESHOLD = 0.0001;
+	public static final int UTILITY_HISTORY_LENGTH = 5000;
+	public static final double CUTOFF_THRESHOLD = 0.01;
 	public static final int NUM_PLAYERS = 2;
 	private double total_utility[];
-	private int update_iterations[];
 	private int utility_history_counter[];
-	private boolean utility_var_valid[];
+	private boolean[] trim;
 
 	
 	public void Print() {
@@ -36,15 +35,14 @@ public class CFRNode_trim {
 		{
 			is_valid[a] = h.action_valid(a);
 		}
-		utility_history = new double[NUM_PLAYERS][UTILITY_HISTORY_LENGTH];
+		utility_history = new double[NUM_PLAYERS][UTILITY_HISTORY_LENGTH+1];
 		utility_history_counter = new int[NUM_PLAYERS];
-		utility_var_valid = new boolean[NUM_PLAYERS];
+		trim = new boolean[NUM_PLAYERS];
 		total_utility = new double[NUM_PLAYERS];
-		update_iterations = new int[NUM_PLAYERS];
 		for (int i=0; i< NUM_PLAYERS; i++){
 			utility_history_counter[i] = 0;
-			utility_var_valid[i] = false;
 			total_utility[i] = 0;
+			trim[i] = false;
 		}
 	}
 	public void updateTables(int player, int index, double regret, double pi0, double pi1, int current_iteration) {
@@ -63,19 +61,19 @@ public class CFRNode_trim {
 		strategySum[next_next_iteration_mod][index] = strategySum[next_iteration_mod][index];
 	}
 	public void updateUtility(double utility, int player){
-		total_utility[player] = total_utility[player] - utility_history[player][utility_history_counter[player]] + utility;
-		update_iterations[player]++;
-		//utility_history[utility_history_counter] = total_utility[player] / update_iterations[player];
-		utility_history[player][utility_history_counter[player]] = utility;
+		total_utility[player] = total_utility[player] + utility;
 		utility_history_counter[player]++;
+		utility_history[player][utility_history_counter[player]] = total_utility[player] / utility_history_counter[player];
 		if (utility_history_counter[player] == UTILITY_HISTORY_LENGTH) {
-			utility_var_valid[player] = true;
+			if (get_var(player) < CUTOFF_THRESHOLD) {
+				trim[player] = true;
+			}
 			utility_history_counter[player] = 0;	
 		}
 	}
 	
 	public boolean can_trim(int player) {
-		if (utility_var_valid[player] == true && get_var(player) < CUTOFF_THRESHOLD) return true;
+		if (trim[player] == true) return true;
 		else return false;
 	}
 	

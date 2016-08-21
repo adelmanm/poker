@@ -5,12 +5,13 @@ public class TrainCFR_Vanilla_trim {
 	static CsvFileWriter CsvWriter = new CsvFileWriter();
 	
 	public double cfr(History h, int player, int iteration, double pi0, double pi1) {
+		
 		//Return payoff for terminal states
 		if (h.is_terminal()) {
 			return ((TerminalNode)h).get_utility(player);// this actually means "get_payoff", since it doesn't include probabilities (algorithm part)
 		}
 		
-		//Sample chance outcome for chance states
+		//Go over all chance outcomes for chance states
 		else if (h.is_chance()) {
 			ChanceNode h_chance = (ChanceNode)h;
 			int num_outcomes = h_chance.num_chance_outcomes();
@@ -40,6 +41,9 @@ public class TrainCFR_Vanilla_trim {
 		if (infoset_node.can_trim(player)) {
 			return infoset_node.get_mean(player);
 		}
+		
+		//statistic to help compare different algorithms
+		VisitedNodesCounter.inc();
 		
 		//For each action, recursively call cfr with additional history and probability
 		double [] node_utility = new double[total_game_actions];
@@ -100,8 +104,10 @@ public class TrainCFR_Vanilla_trim {
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
+	         CFRNode_trim tmpNode = (CFRNode_trim)me.getValue();
+	         double strategy[] = tmpNode.getAverageStrategy();
 	         String filename =  log_dir_path + "infosets.csv";
-	         CsvWriter.write(filename, me.getKey().toString());  
+	         CsvWriter.write(filename, me.getKey().toString(), strategy);  
 	      }
 	    CsvWriter.flush();
 	}
