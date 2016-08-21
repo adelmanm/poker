@@ -6,7 +6,7 @@ public class SimulatorLeduc
 	public static final int NUM_PLAYERS = 2;
 	public static final int TOTAL_GAME_ACTIONS = 5;
 	public static final String log_dir_path = "logs/";
-	public static final int ITERAION_GAP = 1;
+	public static final int ITERAION_GAP = 50;
 	public static final boolean UPDATE_STRATEGY_CSV = false;
 	
 	public static void main(String[] args) // function Solve in the algorithm.
@@ -16,15 +16,18 @@ public class SimulatorLeduc
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations =1000000;
+			num_iterations =45000;
 		}
 		else 
 		{
 			num_iterations = Integer.valueOf(args[0]);
 		}
 		System.out.format("num_iterations is %d\n",num_iterations);
-		TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
+		//TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
 		//TrainCFR_CS trainer= new TrainCFR_CS();
+		//TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim();
+		TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
+		//TrainMCCFR trainer= new TrainMCCFR();
 		double utility[] = new double[NUM_PLAYERS];
 		double utility_avg[] = new double[NUM_PLAYERS];
 		for (int iteration = 0; iteration < num_iterations; iteration++)
@@ -53,6 +56,7 @@ public class SimulatorLeduc
 			System.out.print("player " + String.valueOf(j) + " utility:");
 			System.out.println(utility[j] / num_iterations);
 		}
+		System.out.println("total decision nodes visited: " + VisitedNodesCounter.to_String());
 	}
 	static void create_logs_dir()
 	{

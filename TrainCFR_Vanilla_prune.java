@@ -1,20 +1,33 @@
-/* Implementation of the CFR algorithm - Chance Sampling version */
-
+/* Implementation of the CFR algorithm - Vanilla version with pruning optimization (don't explore nodes with probability 0)*/
 import java.util.*;
-public class TrainCFR_CS {
+public class TrainCFR_Vanilla_prune {
 	private TreeMap<String,CFRNode> nodemap = new TreeMap<String,CFRNode>(); //<key, information set data>
 	static CsvFileWriter CsvWriter = new CsvFileWriter();
 	
 	public double cfr(History h, int player, int iteration, double pi0, double pi1) {
+		
+		//Pruning optimization
+		if (pi0 == 0.0 && pi1 == 0.0) return 0.0;
+		
 		//Return payoff for terminal states
 		if (h.is_terminal()) {
 			return ((TerminalNode)h).get_utility(player);// this actually means "get_payoff", since it doesn't include probabilities (algorithm part)
 		}
 		
-		//Sample chance outcome for chance states
+		//Go over all chance outcomes for chance states
 		else if (h.is_chance()) {
-			Outcome a = ((ChanceNode)h).sample_outcome();
-			return cfr(h.append(a), player, iteration, pi0, pi1);	
+			ChanceNode h_chance = (ChanceNode)h;
+			int num_outcomes = h_chance.num_chance_outcomes();
+			double util = 0.0;
+			for (int i=0;i<num_outcomes;i++){
+				Outcome a = h_chance.get_chance_outcome(i);
+				double prob =h_chance.get_chance_outcome_probability(i);
+				if (player == 0)
+					 util += prob*cfr(h.append(a), player, iteration, pi0, pi1*prob);
+				else if (player == 1)
+					util += prob*cfr(h.append(a), player, iteration, pi0*prob, pi1);
+			}
+			return util;		
 		}
 		
 		//statistic to help compare different algorithms
@@ -87,12 +100,12 @@ public class TrainCFR_CS {
 		Set set = nodemap.entrySet();
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
-	    	Map.Entry me = (Map.Entry)i.next();
+	         Map.Entry me = (Map.Entry)i.next();
 	         CFRNode tmpNode = (CFRNode)me.getValue();
 	         double strategy[] = tmpNode.getAverageStrategy();
 	         String filename =  log_dir_path + "infosets.csv";
-	         CsvWriter.write(filename, me.getKey().toString(), strategy);
+	         CsvWriter.write(filename, me.getKey().toString(), strategy);  
 	      }
-	    CsvWriter.flush_close();
+	    CsvWriter.flush();
 	}
 }
