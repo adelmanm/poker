@@ -5,6 +5,7 @@ public class TrainCFR_Vanilla {
 	static CsvFileWriter CsvWriter = new CsvFileWriter();
 	
 	public double cfr(History h, int player, int iteration, double pi0, double pi1) {
+		
 		//Return payoff for terminal states
 		if (h.is_terminal()) {
 			return ((TerminalNode)h).get_utility(player);// this actually means "get_payoff", since it doesn't include probabilities (algorithm part)
@@ -25,6 +26,9 @@ public class TrainCFR_Vanilla {
 			}
 			return util;		
 		}
+		
+		//statistic to help compare different algorithms
+		VisitedNodesCounter.inc();
 		
 		//Get information set node or create if nonexistant
 		DecisionNode h_decision = (DecisionNode)h;

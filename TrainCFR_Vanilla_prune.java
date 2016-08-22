@@ -1,10 +1,13 @@
-/* Implementation of the CFR algorithm - Vanilla version */
+/* Implementation of the CFR algorithm - Vanilla version with pruning optimization (don't explore nodes with probability 0)*/
 import java.util.*;
-public class TrainCFR_Vanilla_trim {
-	private TreeMap<String,CFRNode_trim> nodemap = new TreeMap<String,CFRNode_trim>(); //<key, information set data>
+public class TrainCFR_Vanilla_prune {
+	private TreeMap<String,CFRNode> nodemap = new TreeMap<String,CFRNode>(); //<key, information set data>
 	static CsvFileWriter CsvWriter = new CsvFileWriter();
 	
 	public double cfr(History h, int player, int iteration, double pi0, double pi1) {
+		
+		//Pruning optimization
+		if (pi0 == 0.0 && pi1 == 0.0) return 0.0;
 		
 		//Return payoff for terminal states
 		if (h.is_terminal()) {
@@ -27,24 +30,18 @@ public class TrainCFR_Vanilla_trim {
 			return util;		
 		}
 		
+		//statistic to help compare different algorithms
+		VisitedNodesCounter.inc();
+		
 		//Get information set node or create if nonexistant
 		DecisionNode h_decision = (DecisionNode)h;
 		int total_game_actions = h_decision.total_game_actions();
 		String infoset_key = h_decision.get_information_set();
-		CFRNode_trim infoset_node = nodemap.get(infoset_key);
+		CFRNode infoset_node = nodemap.get(infoset_key);
 		if (infoset_node == null) {
-			infoset_node = new CFRNode_trim(h_decision);
+			infoset_node = new CFRNode(h_decision);
 			nodemap.put(infoset_key, infoset_node);
 		}
-		
-		//if the utility is stable, return the mean utility
-		if (infoset_node.can_trim(player)) {
-			//return infoset_node.get_mean(player);
-			return infoset_node.get_mean_est(player);
-		}
-		
-		//statistic to help compare different algorithms
-		VisitedNodesCounter.inc();
 		
 		//For each action, recursively call cfr with additional history and probability
 		double [] node_utility = new double[total_game_actions];
@@ -69,7 +66,6 @@ public class TrainCFR_Vanilla_trim {
 				infoset_node.updateTables(player,a,regret,pi0,pi1,iteration);
 			}
 		}
-		infoset_node.updateUtility(total_node_utility,player);
 		return total_node_utility;
 	}
 
@@ -81,7 +77,7 @@ public class TrainCFR_Vanilla_trim {
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
 	         System.out.print(me.getKey() + ": ");
-	         CFRNode_trim tmpNode=(CFRNode_trim)me.getValue();
+	         CFRNode tmpNode=(CFRNode)me.getValue();
 	         tmpNode.Print();
 	      }
 	}
@@ -92,7 +88,7 @@ public class TrainCFR_Vanilla_trim {
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
-	         CFRNode_trim tmpNode=(CFRNode_trim)me.getValue();
+	         CFRNode tmpNode=(CFRNode)me.getValue();
 	         String filename =  log_dir_path + me.getKey() + "_strategy.csv";
 	         double strategy[] = tmpNode.getAverageStrategy();
 	         CsvWriter.write(filename, strategy);
@@ -105,7 +101,7 @@ public class TrainCFR_Vanilla_trim {
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
-	         CFRNode_trim tmpNode = (CFRNode_trim)me.getValue();
+	         CFRNode tmpNode = (CFRNode)me.getValue();
 	         double strategy[] = tmpNode.getAverageStrategy();
 	         String filename =  log_dir_path + "infosets.csv";
 	         CsvWriter.write(filename, me.getKey().toString(), strategy);  

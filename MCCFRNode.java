@@ -1,6 +1,6 @@
 import java.util.Arrays;
 
-public class CFRNode {
+public class MCCFRNode {
 	private double[][] regretSum;
 	private double[] strategy;
 	private double[][] strategySum;
@@ -16,7 +16,7 @@ public class CFRNode {
 	
 	
 	
-	CFRNode(DecisionNode h){
+	MCCFRNode(DecisionNode h){
 		total_game_actions = h.total_game_actions();
 		num_valid_actions = h.num_valid_actions();
 		regretSum = new double[iteration_mod][total_game_actions];
@@ -26,22 +26,22 @@ public class CFRNode {
 		for (int a=0; a < total_game_actions; a++)
 		{
 			is_valid[a] = h.action_valid(a);
-		}
+		}	
 	}
-	public void updateTables(int player, int index, double regret, double pi0, double pi1, int current_iteration) {
+	public void updateRegretSum(int action_index, double regret, int current_iteration) {
 		current_iteration_mod_pointer = current_iteration%iteration_mod;
 		int next_iteration_mod = (current_iteration+1)%iteration_mod;
 		int next_next_iteration_mod = (current_iteration+2)%iteration_mod;
-		if (player == 0) {
-			regretSum[next_iteration_mod][index] += pi1*regret;
-			strategySum[next_iteration_mod][index] += pi0*strategy[index];
-		}
-		else if (player == 1) {
-			regretSum[next_iteration_mod][index] += pi0*regret;
-			strategySum[next_iteration_mod][index] += pi1*strategy[index];
-		}
-		regretSum[next_next_iteration_mod][index] = regretSum[next_iteration_mod][index];
-		strategySum[next_next_iteration_mod][index] = strategySum[next_iteration_mod][index];
+		regretSum[next_iteration_mod][action_index] += regret;
+		regretSum[next_next_iteration_mod][action_index] = regretSum[next_iteration_mod][action_index];
+	}
+	
+	public void updateStrategySum(int action_index, int current_iteration) {
+		current_iteration_mod_pointer = current_iteration%iteration_mod;
+		int next_iteration_mod = (current_iteration+1)%iteration_mod;
+		int next_next_iteration_mod = (current_iteration+2)%iteration_mod;
+		strategySum[next_iteration_mod][action_index] += strategy[action_index];
+		strategySum[next_next_iteration_mod][action_index] = strategySum[next_iteration_mod][action_index];
 	}
 	
 	public double[] getStrategy(int current_iteration) 

@@ -6,11 +6,11 @@ public class AIvsAILeduc
 	public static final int NUM_PLAYERS = 2;
 	public static final int TOTAL_GAME_ACTIONS = 5;
 	public static final String log_dir_path = "logs/";
-	public static final String infoset_filename0 = "infosets_old.csv";
-	public static final String infoset_filename1 = "infosets.csv";
+	public static final String infoset_filename1 = "infosets_trim.csv";
+	public static final String infoset_filename0 = "infosets_vanilla.csv";
 	private static TreeMap<String,double[]> strategy_profile0 = new TreeMap<String,double[]>(); //<key, strategy>
 	private static TreeMap<String,double[]> strategy_profile1 = new TreeMap<String,double[]>(); //<key, strategy>
-	private static final int rounds = 1000000;
+	private static final int rounds = 10000000;
 	private static double AI0_total_score = 0.0;
 	private static double AI1_total_score = 0.0;
 	private static final boolean print = false;
@@ -21,8 +21,13 @@ public class AIvsAILeduc
 		for (int i=0; i<rounds; i++){
 			if (print == true) {
 				System.out.println("Round " + i + ":");
+				System.out.println("AI0 is the starting player");
 			}
-			play_round();
+			play_round(0);
+			if (print == true) {
+				System.out.println("AI1 is the starting player");
+			}
+			play_round(1);
 		}
 		check_winner();
 	}
@@ -37,7 +42,7 @@ public class AIvsAILeduc
 		CsvReader.close();
 	}
 		
-	static void play_round()
+	static void play_round(int starting_player)
 	{
 		HistoryNodeLeduc h = new HistoryNodeLeduc(NUM_PLAYERS, TOTAL_GAME_ACTIONS);
 		boolean flop_revealed = false;
@@ -49,15 +54,25 @@ public class AIvsAILeduc
 			if (h.is_chance()) {
 				do_chance(h);
 			}
-			else if (h.get_player() == 0) {
-				h = (HistoryNodeLeduc)do_AI0_turn(h);
+			if (starting_player == 0) {
+				if (h.get_player() == 0) {
+					h = (HistoryNodeLeduc)do_AI0_turn(h);
+				}
+				else if (h.get_player() == 1){
+					h = (HistoryNodeLeduc)do_AI1_turn(h);
+				}
 			}
-			else if (h.get_player() == 1){
-				h = (HistoryNodeLeduc)do_AI1_turn(h);
+			else if (starting_player == 1) {
+				if (h.get_player() == 0) {
+					h = (HistoryNodeLeduc)do_AI1_turn(h);
+				}
+				else if (h.get_player() == 1){
+					h = (HistoryNodeLeduc)do_AI0_turn(h);
+				}
 			}
 		}
 		//if we reached here then we are at a terminal state
-		calculate_payoff(h);	
+		calculate_payoff(h, starting_player);	
 	}
 	
 	static void reveal_flop(HistoryNodeLeduc h)
@@ -111,7 +126,7 @@ public class AIvsAILeduc
 		else {
 			strategy = strategy_profile1.get(infoset);
 		}
-		double rnd = Math.random()*0.995;
+		double rnd = Math.random()*0.9999;
 		double cum_probability = 0.0;
 		for (int a=0 ; a<strategy.length; a++){
 			cum_probability += strategy[a];
@@ -125,11 +140,13 @@ public class AIvsAILeduc
 		return (Outcome)null; 
 	}
 	
-	static void calculate_payoff(History h)
+	static void calculate_payoff(History h, int starting_player)
 	{
 		TerminalNode h_terminal = (TerminalNode)h;
-		double AI0_score = h_terminal.get_utility(0);
-		double AI1_score = h_terminal.get_utility(1);
+		double player0_score = h_terminal.get_utility(0);
+		double player1_score = h_terminal.get_utility(1);
+		double AI0_score = starting_player == 0 ? player0_score : player1_score;
+		double AI1_score = starting_player == 0 ? player1_score : player0_score;
 		if (print == true){
 			System.out.println("Round finished. AI0 recieved " + AI0_score + " points. AI1 recieved " + AI1_score + " points");
 		}

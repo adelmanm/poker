@@ -1,11 +1,15 @@
-/* Implementation of the CFR algorithm - Chance Sampling version */
+/* Implementation of the MCCFR algorithm - External Sampling with Stochastically Weighted Averaging version */
 
 import java.util.*;
-public class TrainCFR_CS {
-	private TreeMap<String,CFRNode> nodemap = new TreeMap<String,CFRNode>(); //<key, information set data>
+public class TrainMCCFR {
+	private TreeMap<String,MCCFRNode> nodemap = new TreeMap<String,MCCFRNode>(); //<key, information set data>
 	static CsvFileWriter CsvWriter = new CsvFileWriter();
 	
 	public double cfr(History h, int player, int iteration, double pi0, double pi1) {
+		return mccfr(h, player, iteration);
+	}
+	public double mccfr(History h, int player, int iteration) {
+		
 		//Return payoff for terminal states
 		if (h.is_terminal()) {
 			return ((TerminalNode)h).get_utility(player);// this actually means "get_payoff", since it doesn't include probabilities (algorithm part)
@@ -14,7 +18,7 @@ public class TrainCFR_CS {
 		//Sample chance outcome for chance states
 		else if (h.is_chance()) {
 			Outcome a = ((ChanceNode)h).sample_outcome();
-			return cfr(h.append(a), player, iteration, pi0, pi1);	
+			return mccfr(h.append(a), player, iteration);	
 		}
 		
 		//statistic to help compare different algorithms
@@ -24,38 +28,61 @@ public class TrainCFR_CS {
 		DecisionNode h_decision = (DecisionNode)h;
 		int total_game_actions = h_decision.total_game_actions();
 		String infoset_key = h_decision.get_information_set();
-		CFRNode infoset_node = nodemap.get(infoset_key);
+		MCCFRNode infoset_node = nodemap.get(infoset_key);
 		if (infoset_node == null) {
-			infoset_node = new CFRNode(h_decision);
+			infoset_node = new MCCFRNode(h_decision);
 			nodemap.put(infoset_key, infoset_node);
 		}
 		
-		//For each action, recursively call cfr with additional history and probability
-		double [] node_utility = new double[total_game_actions];
-		double total_node_utility = 0.0;
+		//get strategy through regret matching
 		double [] strategy = infoset_node.getStrategy(iteration);
-		for (int a=0; a < total_game_actions; a++){
-			if (h_decision.action_valid(a) == false) continue;
-			if (h_decision.get_player() == 0) {
-				node_utility[a] = cfr(h_decision.append(h_decision.get_decision_outcome(a)), player, iteration, strategy[a]*pi0, pi1);
-			}
-			else if (h_decision.get_player() == 1) {
-				node_utility[a] = cfr(h_decision.append(h_decision.get_decision_outcome(a)), player, iteration, pi0, strategy[a]*pi1);
-			}
-			total_node_utility += strategy[a]*node_utility[a];
-		}
 		
-		//For each action, compute and accumulate counterfactual regrets
+		//for the learning player, go over all actions and update regret sum
 		if (h_decision.get_player() == player) {
+			double [] node_utility = new double[total_game_actions];
+			double total_node_utility = 0.0;
+			for (int a=0; a < total_game_actions; a++){
+				if (h_decision.action_valid(a) == false) continue;
+				node_utility[a] = mccfr(h_decision.append(h_decision.get_decision_outcome(a)), player, iteration);
+				total_node_utility += strategy[a]*node_utility[a];
+			}
 			for (int a=0; a < total_game_actions; a++){
 				if (h_decision.action_valid(a) == false) continue;
 				double regret = node_utility[a]-total_node_utility;
-				infoset_node.updateTables(player,a,regret,pi0,pi1,iteration);
+				infoset_node.updateRegretSum(a,regret,iteration);
+			}
+			return total_node_utility;
+		}
+		//for the opponent, sample an action according to his strategy profile and update strategy sum
+		else{
+			Outcome sampled_opponent_action = get_action_by_strategy(h,strategy);
+			double u = mccfr(h.append(sampled_opponent_action), player, iteration);
+			for (int a=0; a < total_game_actions; a++){
+				if (h_decision.action_valid(a) == false) continue;
+				infoset_node.updateStrategySum(a,iteration);
+			}
+			return u;
+		}
+	}
+	
+	//sample player action according to a strategy profile
+	static Outcome get_action_by_strategy (History h, double[] strategy)
+	{
+		DecisionNode h_decision = (DecisionNode)h;
+		double rnd = Math.random();
+		double cum_probability = 0.0;
+		for (int a=0 ; a<strategy.length; a++){
+			cum_probability += strategy[a];
+			//System.out.println("a is " + a + " rnd is" + rnd + " cum_probability is " + cum_probability);
+			if (rnd < cum_probability) {
+				assert (h_decision.action_valid(a));
+				return h_decision.get_decision_outcome(a);
 			}
 		}
-		return total_node_utility;
+		assert(false); //we're not supposed to reach that
+		return (Outcome)null; 
 	}
-
+	
 	//print strategy profile
 	public void print() {
 		System.out.println("Final strategy profile:");
@@ -64,7 +91,7 @@ public class TrainCFR_CS {
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
 	         System.out.print(me.getKey() + ": ");
-	         CFRNode tmpNode=(CFRNode)me.getValue();
+	         MCCFRNode tmpNode=(MCCFRNode)me.getValue();
 	         tmpNode.Print();
 	      }
 	}
@@ -75,7 +102,7 @@ public class TrainCFR_CS {
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
-	         CFRNode tmpNode=(CFRNode)me.getValue();
+	         MCCFRNode tmpNode=(MCCFRNode)me.getValue();
 	         String filename =  log_dir_path + me.getKey() + "_strategy.csv";
 	         double strategy[] = tmpNode.getAverageStrategy();
 	         CsvWriter.write(filename, strategy);
@@ -88,7 +115,7 @@ public class TrainCFR_CS {
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
 	    	Map.Entry me = (Map.Entry)i.next();
-	         CFRNode tmpNode = (CFRNode)me.getValue();
+	         MCCFRNode tmpNode = (MCCFRNode)me.getValue();
 	         double strategy[] = tmpNode.getAverageStrategy();
 	         String filename =  log_dir_path + "infosets.csv";
 	         CsvWriter.write(filename, me.getKey().toString(), strategy);
