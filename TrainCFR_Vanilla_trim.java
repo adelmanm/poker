@@ -39,7 +39,8 @@ public class TrainCFR_Vanilla_trim {
 		
 		//if the utility is stable, return the mean utility
 		if (infoset_node.can_trim(player)) {
-			return infoset_node.get_mean(player);
+			//return infoset_node.get_mean(player);
+			return infoset_node.get_mean_est(player);
 		}
 		
 		//statistic to help compare different algorithms
