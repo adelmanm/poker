@@ -1,8 +1,11 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
 public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, TerminalNode 
 {
 	int NUM_PLAYERS ;
@@ -199,9 +202,9 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 			// apparently i don't have the code src file.  
 			System.arraycopy(allCards, 0, cards[0], 0, ROUNDS-1);
 			Arrays.sort(cards[0]); // it is important to sort in order to create the same information set to all equivalent permutations.
-			System.arraycopy(allCards, ROUNDS, cards[1], 0, ROUNDS-1);
+			System.arraycopy(allCards, ROUNDS-1, cards[1], 0, ROUNDS-1);
 			Arrays.sort(cards[1]);
-			System.arraycopy(allCards, 2*ROUNDS-1, cards[2], 0,  ROUNDS-1);
+			System.arraycopy(allCards, 2*ROUNDS-2, cards[2], 0,  ROUNDS-1);
 			Arrays.sort(cards[2]);
 			
 		}
@@ -235,19 +238,20 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 	public int num_chance_outcomes()
 	{
 		return  (factorial(DECK_SIZE)) / factorial(DECK_SIZE-3*ROUNDS+3) ; // (DECK_SIZE over dealt cards)*((dealt cards)!)
+		//return 719;
 	}
 	
 	public Outcome get_chance_outcome(int outcome_num)
 	{// for vanilla algorithm - need to go through all cards combinations.  
-		int[][] cards_combination = creat_cards_permutations(); // num_chance_outcomes() X (3*ROUNDS-3)
+		int[][] cards_combination = creat_cards_permutations(); // num_chance_outcomes() X (DECK_SIZE), the dealt cards are at the beginning of the array. 
 		int player=this.get_player();
 		if (player==0) // the cards are dealt once.
 		{
 			System.arraycopy(cards_combination[outcome_num], 0, cards[0], 0, ROUNDS-1);
 			Arrays.sort(cards[0]);
-			System.arraycopy(cards_combination[outcome_num], ROUNDS, cards[1], 0, ROUNDS-1);
+			System.arraycopy(cards_combination[outcome_num], ROUNDS-1, cards[1], 0, ROUNDS-1);
 			Arrays.sort(cards[1]);
-			System.arraycopy(cards_combination[outcome_num], 2*ROUNDS-1, cards[2], 0, ROUNDS-1);
+			System.arraycopy(cards_combination[outcome_num], 2*ROUNDS-2, cards[2], 0, ROUNDS-1);
 			Arrays.sort(cards[2]);
 		}
 		Outcome_Class outcome = new Outcome_Class();
@@ -266,7 +270,13 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 	{
 	    ArrayList<int[]> ret = new ArrayList<int[]>();
 	    permutation(a, 0, ret);
-	    return (int[][]) ret.toArray();
+	    
+	    int[][] array=new int[ret.size()][];
+	    for (int i = 0; i < ret.size(); i++) {
+	    	array[i] = ret.get(i);
+	    }
+       
+	    return array;
 	}
 
 	public static void permutation(int[] arr, int pos, ArrayList<int[]> list )
