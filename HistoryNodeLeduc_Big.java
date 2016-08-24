@@ -54,7 +54,7 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 						{
 							case 'b': round_payoff +=1.0; break;
 							case 'C': round_payoff +=1.0; break;
-							case 'R': round_payoff +=2.0; break;  // was +2 but I think it's wrong
+							case 'R': round_payoff +=1.0; break;  // was +2 but I think it's wrong
 							default : break;
 						}
 					}
@@ -218,10 +218,10 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 	{
 		
 		int [] deck= new int[DECK_SIZE];
-		for (int i = 0; i < DECK_SIZE/2; i++)
+		for (int i = 0; i < DECK_SIZE; i+=2)
 		{
-			deck[i]=i+1;
-			deck[DECK_SIZE-i-1]=i+1;
+			deck[i]=i/2+1;
+			deck[i+1]=i/2+1;
 		}
 		return deck;
 	}
@@ -237,8 +237,9 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 	@Override 
 	public int num_chance_outcomes()
 	{
-		return  (factorial(DECK_SIZE)) / factorial(DECK_SIZE-3*ROUNDS+3) ; // (DECK_SIZE over dealt cards)*((dealt cards)!)
+		//return  (factorial(DECK_SIZE)) / factorial(DECK_SIZE-3*ROUNDS+3) ; // (DECK_SIZE over dealt cards)*((dealt cards)!)
 		//return 719;
+		return this.get_number_of_permutes(DECK_SIZE, 3*ROUNDS-3);
 	}
 	
 	public Outcome get_chance_outcome(int outcome_num)
@@ -262,10 +263,72 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 	public int[][] creat_cards_permutations()
 	{
 		int[] allCards=this.create_deck();
-		int[][] cards_permutations = permutations(allCards); //  the permutations should be of the subsets of the dealt cards.
-		return cards_permutations;
 		
+	
+		
+	
+		int len = allCards.length;
+		
+		int elements_needed = 3*ROUNDS-3; //number of cards actually needed (3 in leduc)
+		int number_of_permutes = get_number_of_permutes(len,elements_needed);
+		int[][] cards_permutations =new int[number_of_permutes][] ; //  the permutations should be of the subsets of the dealt cards.
+		//System.out.println("number of permutes:" + number_of_permutes);
+		int[] permute = new int[elements_needed];
+		for(int permute_id = 0; permute_id<number_of_permutes; permute_id++)
+		{
+			permute = get_permute(permute_id, len, elements_needed, allCards);
+			cards_permutations[permute_id]=permute;
+			/*
+			for (int i=0; i<elements_needed; i++) 
+			{
+				System.out.print(permute[i] + " ");
+			}
+			System.out.println("");
+			*/
+		}
+		return cards_permutations;
+			
 	}
+	
+	public static int[] get_permute(int permute_id, int len, int elements_needed, int[] allCards)
+	{
+		boolean[] visited = new boolean[len];
+		Arrays.fill(visited, Boolean.FALSE);
+		int modified_id = permute_id;
+		int[] permute = new int[elements_needed];
+		int current_index;
+		int base;
+		int perm_fill = 0;
+		for (int i=len; i>len-elements_needed; i--)
+		{
+			current_index = modified_id % i;
+			int counting = 0;
+			int j;
+			for (j=0; j<len;j++) 
+			{
+				if (visited[j] == false) counting++;
+				if (counting > current_index) break;
+			}
+			visited[j] = true;
+			permute[perm_fill] = allCards[j];
+			perm_fill++;
+			modified_id = (modified_id - current_index)/i;
+		}
+		return permute;
+	}
+	
+	public static int get_number_of_permutes(int len, int elements_needed)
+	{
+		int num = 1;
+		for (int i = 0; i < elements_needed; i++){
+			num *= (len-i);
+		}
+		return num;
+	}
+
+		
+	
+	/*
 	static int[][] permutations(int[] a) 
 	{
 	    ArrayList<int[]> ret = new ArrayList<int[]>();
@@ -298,10 +361,12 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 	    arr[pos1] = arr[pos2];
 	    arr[pos2] = h;
 	}
+	*/
 	public double get_chance_outcome_probability(int outcome_num)
 	{
-		return 1/this.num_chance_outcomes();
+		return 1.0/this.num_chance_outcomes();
 	}
+	
 	
 	@Override 
 	public boolean is_terminal() //History
