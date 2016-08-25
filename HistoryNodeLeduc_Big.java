@@ -61,25 +61,24 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 						}
 					}
 				}
-				//payoff += round_payoff*Bet_Sum[i];
-				int winner=this.who_won(); // returns -1 if no one won.
-				if (winner==-2)//flop ending 
-				{
-					int finishing_player = 1-this.get_player(); //get_player() returns the player whose turn is now, so invert it to get the player who played the last turn
-					pay_off = (player==finishing_player) ? -player_bets[player] : player_bets[1-player]; //the folding player loses his bets 
-					return pay_off;
-				}
-				if (winner==-1) { //there's a tie, players split the pot so no one profits
-					return 0.0;
-				}
-				if ( winner>-1) //there's a winner
-				{
-					pay_off = player==winner ? player_bets[1-player] : -player_bets[player] ;
-					return pay_off;
-				}
+			}
+			int winner=this.who_won(); // returns -1 if no one won.
+			if (winner==-2)//flop ending 
+			{
+				int finishing_player = 1-this.get_player(); //get_player() returns the player whose turn is now, so invert it to get the player who played the last turn
+				pay_off = (player==finishing_player) ? -player_bets[player] : player_bets[1-player]; //the folding player loses his bets 
+				return pay_off;
+			}
+			if (winner==-1) { //there's a tie, players split the pot so no one profits
+				return 0.0;
+			}
+			if ( winner>-1) //there's a winner
+			{
+				pay_off = player==winner ? player_bets[1-player] : -player_bets[player] ;
+				return pay_off;
 			}
 		}
-		return 0;
+		return 0.0;
 	}
 
 	public int who_won()
@@ -235,19 +234,9 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 		return deck;
 	}
 	
-	public int factorial(int number) 
-	{
-		if (number <= 1)
-		   return 1;
-		else
-		   return number * factorial(number - 1);
-	}
-
 	@Override 
 	public int num_chance_outcomes()
 	{
-		//return  (factorial(DECK_SIZE)) / factorial(DECK_SIZE-3*ROUNDS+3) ; // (DECK_SIZE over dealt cards)*((dealt cards)!)
-		//return 719;
 		return this.get_number_of_permutes(DECK_SIZE, 3*ROUNDS-3);
 	}
 	
@@ -335,42 +324,6 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 		return num;
 	}
 
-		
-	
-	/*
-	static int[][] permutations(int[] a) 
-	{
-	    ArrayList<int[]> ret = new ArrayList<int[]>();
-	    permutation(a, 0, ret);
-	    
-	    int[][] array=new int[ret.size()][];
-	    for (int i = 0; i < ret.size(); i++) {
-	    	array[i] = ret.get(i);
-	    }
-       
-	    return array;
-	}
-
-	public static void permutation(int[] arr, int pos, ArrayList<int[]> list )
-	{
-	    if(arr.length - pos == 1)
-	        list.add(arr.clone());
-	    else
-	        for(int i = pos; i < arr.length; i++)
-	        {
-	            swap(arr, pos, i);
-	            permutation(arr, pos+1, list);
-	            swap(arr, pos, i);
-	        }
-	}
-
-	public static void swap(int[] arr, int pos1, int pos2)
-	{
-	    int h = arr[pos1];
-	    arr[pos1] = arr[pos2];
-	    arr[pos2] = h;
-	}
-	*/
 	public double get_chance_outcome_probability(int outcome_num)
 	{
 		return 1.0/this.num_chance_outcomes();
@@ -464,6 +417,7 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 		int player= this.get_player();
 		String infoset= new String();
 		infoset+=Arrays.toString(cards[player]);
+		infoset = infoset.substring(1,infoset.length()-1); //compatability with HistoryNodeLeduc information sets
 		/* for (int i=0; i<ROUNDS; i++)
 		{
 			infoset+=cards[player].toString();
