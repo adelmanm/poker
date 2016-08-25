@@ -40,35 +40,44 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 	{
 		if (this.is_terminal()) 
 		{
-			double payoff=0;
+			double[] player_bets = {1.0,1.0}; //both players start the game with a bet of 1  
+			double pay_off=0;
+			int betting_player;
 			for (int i=0; i< ROUNDS; i++)
 			{
 				char curr_char=' ';
-				double round_payoff=0;
 				if (decisions[i]!=null)
 				{
 					for (int j=0; j<decisions[i].length(); j++)
 					{
+						betting_player =  j%2 ;
 						curr_char= decisions[i].charAt(j);
 						switch (curr_char)
 						{
-							case 'b': round_payoff +=1.0; break;
-							case 'C': round_payoff +=1.0; break;
-							case 'R': round_payoff +=1.0; break;  // was +2 but I think it's wrong
+							case 'b': player_bets[betting_player] +=1.0; break;
+							case 'C': player_bets[betting_player] +=1.0; break;
+							case 'R': player_bets[betting_player] +=2.0; break;
 							default : break;
 						}
 					}
 				}
-				
-				payoff += round_payoff*Bet_Sum[i];
+				//payoff += round_payoff*Bet_Sum[i];
+				int winner=this.who_won(); // returns -1 if no one won.
+				if (winner==-2)//flop ending 
+				{
+					int finishing_player = 1-this.get_player(); //get_player() returns the player whose turn is now, so invert it to get the player who played the last turn
+					pay_off = (player==finishing_player) ? -player_bets[player] : player_bets[1-player]; //the folding player loses his bets 
+					return pay_off;
+				}
+				if (winner==-1) { //there's a tie, players split the pot so no one profits
+					return 0.0;
+				}
+				if ( winner>-1) //there's a winner
+				{
+					pay_off = player==winner ? player_bets[1-player] : -player_bets[player] ;
+					return pay_off;
+				}
 			}
-			int winner=this.who_won(); // returns -1 if no one won.
-			if (winner==-1)  
-				return 0;
-			if (player==winner)
-				return payoff;
-			else
-				return -payoff;
 		}
 		return 0;
 	}
@@ -79,7 +88,7 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 		{
 			int round=this.get_current_round();
 			if (decisions[round].endsWith("F")) // Fold ended the game
-				return this.get_player(); // get.player is the one "to come", so after a flop is the winner.
+				return -2;
 			if (decisions[round].endsWith("cc")) // no one wins
 				return -1;
 			int player_with_highest_flop_match= get_highest_flop_match_player(); // returns -1 if there's no match
