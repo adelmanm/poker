@@ -30,7 +30,9 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 			}
 			// memory - we need to save cards and decisions.
 			cards= new int[3][rounds-1]; // should be initialized to 0.
-			decisions=new String[rounds]; // should be initialized to NULL. 
+			decisions=new String[rounds]; // should be initialized to NULL.
+			//int[][] cards= new int[3][rounds-1]; // should be initialized to 0.
+			//String [] decisions=new String[rounds]; // should be initialized to NULL.
 	 }
 	 
 
@@ -50,7 +52,7 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 				{
 					for (int j=0; j<decisions[i].length(); j++)
 					{
-						betting_player =  j%2 ;
+						betting_player = j%2 ;
 						curr_char= decisions[i].charAt(j);
 						switch (curr_char)
 						{
@@ -88,7 +90,7 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 			int round=this.get_current_round();
 			if (decisions[round].endsWith("F")) // Fold ended the game
 				return -2;
-			if (decisions[round].endsWith("cc")) // no one wins
+			if (decisions[round].endsWith("cc")) // no one wins 
 				return -1;
 			int player_with_highest_flop_match= get_highest_flop_match_player(); // returns -1 if there's no match
 			if (player_with_highest_flop_match>-1)
@@ -100,43 +102,58 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 			else
 				return 1;	
 		}
-		return -1;
+		return -3;
 	}
 	
 	
 	public int get_highest_flop_match_player()
 	{// all cards are sorted. for two players, with a deck made of couples, there is no possibility of both players having the same flop match. 
-		int i_0=ROUNDS-2, i_1=ROUNDS-2, i_2=ROUNDS-2; // ROUNDS-1 cards 
-		while(((i_0>=0)&&(i_2>=0)))
+		//int i_0=ROUNDS-2, i_1=ROUNDS-2, i_2=ROUNDS-2; // ROUNDS-1 cards 
+	
+/*
+if (this.get_information_set()=="12cccbC")
+{
+	int please=1;
+	please++;
+}
+*/
+		int i_0=ROUNDS-2;
+		int i_2_0=ROUNDS-2;
+
+		while(((i_0>=0)&&(i_2_0>=0)))
 		{
-			if (cards[0][i_0]==cards[2][i_2])
+			if (cards[0][i_0]==cards[2][i_2_0])
 				break;
-			if (cards[0][i_0]>cards[2][i_2])
+			if (cards[0][i_0]>cards[2][i_2_0])
 				i_0--;
 			else
-				if (cards[0][i_0]<cards[2][i_2])
-					i_2--;
+				if (cards[0][i_0]<cards[2][i_2_0])
+					i_2_0--;
 			
 		}
-		while(((i_1>=0)&&(i_2>=0)))
+		
+		int i_1=ROUNDS-2;
+		int i_2_1=ROUNDS-2;
+		
+		while(((i_1>=0)&&(i_2_1>=0)))
 		{
-			if (cards[1][i_1]==cards[2][i_2])
+			if (cards[1][i_1]==cards[2][i_2_1])
 				break;
-			if (cards[1][i_1]>cards[2][i_2])
+			if (cards[1][i_1]>cards[2][i_2_1])
 				i_1--;
 			else
-				if (cards[1][i_1]<cards[2][i_2])
-					i_2--;
+				if (cards[1][i_1]<cards[2][i_2_1])
+					i_2_1--;
 			
 		}
 				
-		if ((i_0<0) && (i_1<0)) // no one has a match
+		if (((i_0<0)||(i_2_0<0)) && ((i_1<0)||(i_2_1<0)) ) // no one has a match
 			return -1;
-		if ((i_0<0) && (i_1>=0)) // only player 1 has a match
+		if ( ((i_0<0)||(i_2_0<0)) && ((i_1>=0)||(i_2_1>=0)) ) // only player 1 has a match
 			return 1;
-		if ((i_1<0) && (i_0>=0)) // only player 0 has a match
+		if (((i_0>=0)||(i_2_0>=0)) && ((i_1<0)||(i_2_1<0))) // only player 0 has a match
 			return 0;
-		if (cards[0][i_0]>cards[1][i_1]) // both players have a match, the highest one wins.
+		if (cards[0][i_0]>cards[1][i_1]) // both players have a match, the highest one wins. SHOULD NOT OCCURE IN 2 ROUNDS LEDUC
 			return 0;
 		else
 			return 1;
