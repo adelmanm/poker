@@ -44,10 +44,10 @@ public class AIvsAILeduc_Big
 		
 	static void play_round(int starting_player)
 	{
-		HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big(NUM_PLAYERS, TOTAL_GAME_ACTIONS,2,6);
+		HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big(NUM_PLAYERS, TOTAL_GAME_ACTIONS,2,6,2);
 		boolean flop_revealed = false;
 		while (!h.is_terminal()) {
-			if (flop_revealed == false && h.get_current_round()>0) {
+			if (flop_revealed == false && h.current_round>0) {
 				reveal_flop(h);
 				flop_revealed = true;
 			}
@@ -78,7 +78,7 @@ public class AIvsAILeduc_Big
 	static void reveal_flop(HistoryNodeLeduc_Big h)
 	{
 		if (print == true) {
-			System.out.println("Flop is revealed as " + h.cards[2]);
+			System.out.println("Flop is revealed as " + h.flop_cards);
 		}
 	}
 	
@@ -88,7 +88,7 @@ public class AIvsAILeduc_Big
 		ChanceNode h_chance = (ChanceNode)h;
 		h_chance.sample_outcome();
 		//h_chance.get_chance_outcome(global_round%18);
-		int cards[][] = ((HistoryNodeLeduc_Big)h).cards;
+		int cards[][] = ((HistoryNodeLeduc_Big)h).player_cards;
 		if (print == true){
 			System.out.println("AI0 received card " + cards[0][0]);
 			System.out.println("AI1 received card " + cards[1][0]);

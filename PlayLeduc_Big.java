@@ -74,10 +74,10 @@ public class PlayLeduc_Big
 	
 	static void play_round()
 	{
-		HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big(NUM_PLAYERS, TOTAL_GAME_ACTIONS,2,6);
+		HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big(NUM_PLAYERS, TOTAL_GAME_ACTIONS,2,6,1);
 		boolean flop_revealed = false;
 		while (!h.is_terminal()) {
-			if (flop_revealed == false && h.get_current_round()>0) {
+			if (flop_revealed == false && h.current_round>0) {
 				reveal_flop(h);
 				flop_revealed = true;
 			}
@@ -97,7 +97,7 @@ public class PlayLeduc_Big
 	
 	static void reveal_flop(HistoryNodeLeduc_Big h)
 	{
-		System.out.println("Flop is revealed as " + h.cards[2][0]);
+		System.out.println("Flop is revealed as " + h.flop_cards[0]);
 	}
 	
 	static void do_chance(History h) 
@@ -105,7 +105,7 @@ public class PlayLeduc_Big
 		assert(h.is_chance());
 		ChanceNode h_chance = (ChanceNode)h;
 		h_chance.sample_outcome();
-		int card = ((HistoryNodeLeduc_Big)h).cards[player][0];
+		int card = ((HistoryNodeLeduc_Big)h).player_cards[player][0];
 		System.out.println("Player " + player + " your card is " + card);
 	}
 	
@@ -176,8 +176,8 @@ public class PlayLeduc_Big
 		TerminalNode h_terminal = (TerminalNode)h;
 		double player_score = h_terminal.get_utility(player);
 		double computer_score = h_terminal.get_utility(1-player);
-		if (!((HistoryNodeLeduc_Big)h).decisions[((HistoryNodeLeduc_Big)h).get_current_round()].endsWith("F")) {
-			System.out.println("Computer card is " + ((HistoryNodeLeduc_Big)h).cards[1-player][0]);
+		if (!((HistoryNodeLeduc_Big)h).decisions[((HistoryNodeLeduc_Big)h).current_round].endsWith("F")) {
+			System.out.println("Computer card is " + ((HistoryNodeLeduc_Big)h).player_cards[1-player][0]);
 		}
 		System.out.println("Round finished. Player recieved " + player_score + " points. Computer (player " + (1-player) + ") recieved " + computer_score + " points");
 		player_total_score += player_score;
