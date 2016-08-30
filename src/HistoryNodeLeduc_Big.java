@@ -652,6 +652,7 @@ public class HistoryNodeLeduc_Big implements History, ChanceNode, DecisionNode, 
 		else if (value == 12) return String.valueOf('Q');
 		else if (value == 13) return String.valueOf('K');
 		else if (value == 14) return String.valueOf('A');
+		else if (value > 14) return String.valueOf(value);
 		
 		assert(false);
 		return "";
