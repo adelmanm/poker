@@ -3,14 +3,18 @@ import java.lang.Math;
 
 public class AIvsAILeduc_Big  
 {
-	public static final int NUM_PLAYERS = 2;
-	public static final int TOTAL_GAME_ACTIONS = 5;
+	public static final int NUM_GAME_SETTINGS = 10;
 	public static final String log_dir_path = "logs/";
-	public static final String infoset_filename0 = "infosets_big.csv";
+	public static final String infoset_filename0 = "infosets.csv";
 	public static final String infoset_filename1 = "infosets.csv";
+	public static final String game_settings_fliename = "game_settings.csv";
+	private static int NUM_PLAYER_CARDS; //number of cards per player
+	private static int FLOP_SIZE; // number of community cards revealed in the first flop
 	private static TreeMap<String,double[]> strategy_profile0 = new TreeMap<String,double[]>(); //<key, strategy>
 	private static TreeMap<String,double[]> strategy_profile1 = new TreeMap<String,double[]>(); //<key, strategy>
-	private static final int rounds = 10000;
+	private static final int rounds = 100000;
+	private static String[] settings_name = new String[NUM_GAME_SETTINGS];
+	private static int[] settings_value = new int[NUM_GAME_SETTINGS];
 	private static double AI0_total_score = 0.0;
 	private static double AI1_total_score = 0.0;
 	private static final boolean print = false;
@@ -18,16 +22,19 @@ public class AIvsAILeduc_Big
 	public static void main(String[] args) // function Solve in the algorithm.
 	{
 		read_infosets();
+		read_settings();
 		for (int i=0; i<rounds; i++){
 			if (print == true) {
 				System.out.println("Round " + i + ":");
 				System.out.println("AI0 is the starting player");
 			}
 			play_round(0);
+			/*
 			if (print == true) {
 				System.out.println("AI1 is the starting player");
 			}
-			//play_round(1);
+			play_round(1);
+			*/
 		}
 		check_winner();
 	}
@@ -41,16 +48,34 @@ public class AIvsAILeduc_Big
 		CsvReader.read(infoset_path1,strategy_profile1);
 		CsvReader.close();
 	}
+	
+	static void read_settings()
+	{
+		CsvFileReader CsvReader = new CsvFileReader();
+		String setting_path = log_dir_path + game_settings_fliename;
+		CsvReader.read_game_settings(setting_path, settings_name, settings_value);
+		CsvReader.close();
+		System.out.println("Game settings:");
+		for (int i = 0; i< NUM_GAME_SETTINGS; i++){
+			System.out.println(settings_name[i] + ": " + String.valueOf(settings_value[i]));
+		}
+		assert(settings_name[4].equals("num_player_cards"));
+		NUM_PLAYER_CARDS = settings_value[4];
+		assert(settings_name[7].equals("flop_size"));
+		FLOP_SIZE = settings_value[7];
+		System.out.println(" ");
+	}
 		
 	static void play_round(int starting_player)
 	{
-		HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big(NUM_PLAYERS, TOTAL_GAME_ACTIONS,2,6,2);
-		boolean flop_revealed = false;
+		HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big();
+		
 		while (!h.is_terminal()) {
-			if (flop_revealed == false && h.current_round>0) {
-				reveal_flop(h);
-				flop_revealed = true;
+			int current_round = h.current_round;
+			if (current_round>0 && h.decisions[current_round] == null && print == true) {
+				reveal_flop(h,current_round);
 			}
+			
 			if (h.is_chance()) {
 				do_chance(h);
 			}
@@ -75,10 +100,15 @@ public class AIvsAILeduc_Big
 		calculate_payoff(h, starting_player);	
 	}
 	
-	static void reveal_flop(HistoryNodeLeduc_Big h)
+	static void reveal_flop(HistoryNodeLeduc_Big h, int current_round)
 	{
-		if (print == true) {
-			System.out.println("Flop is revealed as " + h.flop_cards);
+		if (current_round == 1) {
+			for (int i=0; i<FLOP_SIZE; i++){
+				System.out.println("community_card number " + String.valueOf(i+1)+ " is " + h.card_str(h.community_cards[i]));
+			}
+		}
+		else {
+			System.out.println("community_card number " + String.valueOf(current_round+1)+ " is " + h.card_str(h.community_cards[FLOP_SIZE + current_round-2]));
 		}
 	}
 	
@@ -87,11 +117,22 @@ public class AIvsAILeduc_Big
 		assert(h.is_chance());
 		ChanceNode h_chance = (ChanceNode)h;
 		h_chance.sample_outcome();
-		//h_chance.get_chance_outcome(global_round%18);
 		int cards[][] = ((HistoryNodeLeduc_Big)h).player_cards;
 		if (print == true){
-			System.out.println("AI0 received card " + cards[0][0]);
-			System.out.println("AI1 received card " + cards[1][0]);
+			System.out.print("first player received cards ");
+			for (int i=0; i<NUM_PLAYER_CARDS; i++) {
+				int card = ((HistoryNodeLeduc_Big)h).player_cards[0][i];
+				if (i>0) System.out.print(",");
+				System.out.print(((HistoryNodeLeduc_Big)h).card_str(card));
+			}
+			System.out.println(" ");
+			System.out.print("second player received cards ");
+			for (int i=0; i<NUM_PLAYER_CARDS; i++) {
+				int card = ((HistoryNodeLeduc_Big)h).player_cards[1][i];
+				if (i>0) System.out.print(",");
+				System.out.print(((HistoryNodeLeduc_Big)h).card_str(card));
+			}
+			System.out.println(" ");
 		}
 	}
 
