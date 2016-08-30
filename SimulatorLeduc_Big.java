@@ -3,23 +3,30 @@ import java.io.File;
 
 public class SimulatorLeduc_Big  
 {
-	public static final int NUM_PLAYERS = 2;
-	public static final int TOTAL_GAME_ACTIONS = 5;
-	public static final int ROUNDS=2; 
-	public static final int DECK_SIZE=6;  
-	public static final int HAND_SIZE = 1;
-	public static final String log_dir_path = "logs_big/";
-	public static final int ITERAION_GAP = 50;
+	public static final int NUM_PLAYERS = 2;		//2 in standard leduc. number of players/
+	public static final int TOTAL_GAME_ACTIONS = 5; //5 in standard leduc. total number of different actions in the game
+	public static final int ROUNDS=2; 				//2 in standard leduc. number of betting rounds, including the first blind one.
+	public static final int DECK_SIZE=6;  			//6 in standard leduc. total number of cards
+	public static final int NUM_PLAYER_CARDS = 1;	//1 in standard leduc. number of cards per player
+	public static final int NUM_SUITS = 2;			//2 in standard leduc. number of different card suits (cards with the same number)
+	public static final int HAND_SIZE = 2;			//2 in standard leduc. size of the poker hand (can be composed from player and community cards)
+	public static final int FLOP_SIZE = 1;			//1 in standard leduc. number of community cards revealed after the first round (only 1 card in later rounds)
+	public static final int ANTE = 1;				//1 in standard leduc. the money each player pays at the beginning of the game
+	public static final int[] BET_SUM  = {1,1};		//{1,1} in standard leduc. amount of bet per round.
+	public static final String log_dir_path = "logs/";
+	public static final String game_settings_fliename = "game_settings.csv";
+	public static final int ITERAION_GAP = 1;
 	public static final boolean UPDATE_STRATEGY_CSV = false;
 	
 	public static void main(String[] args) // function Solve in the algorithm.
 	{
 		CsvFileWriter CsvWriter = new CsvFileWriter();
 		create_logs_dir();
+		write_game_settings(CsvWriter);
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations =10000;
+			num_iterations =2;
 		}
 		else 
 		{
@@ -37,7 +44,7 @@ public class SimulatorLeduc_Big
 		{
 			for (int player=0;player < NUM_PLAYERS;player++)
 			{
-				HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big(NUM_PLAYERS, TOTAL_GAME_ACTIONS, ROUNDS, DECK_SIZE, HAND_SIZE);
+				HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big();
 				utility[player] += trainer.cfr(h,player,iteration,1.0,1.0);
 			}
 			if (iteration % ITERAION_GAP == 0) {
@@ -68,5 +75,9 @@ public class SimulatorLeduc_Big
 		for (File sub : log_dir.listFiles()) {
             sub.delete();
         }
+	}
+	static void write_game_settings(CsvFileWriter CsvWriter)
+	{
+		CsvWriter.write_game_settings(log_dir_path + game_settings_fliename, NUM_PLAYERS, TOTAL_GAME_ACTIONS, ROUNDS, DECK_SIZE, NUM_PLAYER_CARDS, NUM_SUITS, HAND_SIZE, FLOP_SIZE,ANTE,BET_SUM);
 	}
 }

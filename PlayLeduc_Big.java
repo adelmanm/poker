@@ -4,13 +4,17 @@ import java.lang.Math;
 
 public class PlayLeduc_Big  
 {
-	public static final int NUM_PLAYERS = 2;
-	public static final int TOTAL_GAME_ACTIONS = 5;
+	public static final int NUM_GAME_SETTINGS = 10;
 	public static final String log_dir_path = "logs/";
 	public static final String infoset_filename = "infosets.csv";
+	public static final String game_settings_fliename = "game_settings.csv";
 	private static TreeMap<String,double[]> strategy_profile = new TreeMap<String,double[]>(); //<key, strategy>
+	private static int NUM_PLAYER_CARDS; //number of cards per player
+	private static int FLOP_SIZE; // number of community cards revealed in the first flop
 	private static int player;
 	private static int rounds;
+	private static String[] settings_name = new String[NUM_GAME_SETTINGS];
+	private static int[] settings_value = new int[NUM_GAME_SETTINGS];
 	private static double player_total_score = 0.0;
 	private static double computer_total_score = 0.0;
 	private static Scanner reader;
@@ -19,6 +23,7 @@ public class PlayLeduc_Big
 	{
 		reader = new Scanner(System.in);  // Reading from System.in
 		read_infosets();
+		read_settings();
 		player = get_player();
 		rounds = get_rounds();
 		for (int i=1; i<=rounds; i++){
@@ -36,6 +41,25 @@ public class PlayLeduc_Big
 		CsvReader.read(infoset_path,strategy_profile);
 		CsvReader.close();
 	}
+	
+	static void read_settings()
+	{
+		CsvFileReader CsvReader = new CsvFileReader();
+		String setting_path = log_dir_path + game_settings_fliename;
+		CsvReader.read_game_settings(setting_path, settings_name, settings_value);
+		CsvReader.close();
+		System.out.println("Game settings:");
+		for (int i = 0; i< NUM_GAME_SETTINGS; i++){
+			System.out.println(settings_name[i] + ": " + String.valueOf(settings_value[i]));
+		}
+		assert(settings_name[4].equals("num_player_cards"));
+		NUM_PLAYER_CARDS = settings_value[4];
+		assert(settings_name[7].equals("flop_size"));
+		FLOP_SIZE = settings_value[7];
+		System.out.println(" ");
+	}
+	
+	
 	
 	static int get_player()
 	{
@@ -74,12 +98,11 @@ public class PlayLeduc_Big
 	
 	static void play_round()
 	{
-		HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big(NUM_PLAYERS, TOTAL_GAME_ACTIONS,2,6,1);
-		boolean flop_revealed = false;
+		HistoryNodeLeduc_Big h = new HistoryNodeLeduc_Big();
 		while (!h.is_terminal()) {
-			if (flop_revealed == false && h.current_round>0) {
-				reveal_flop(h);
-				flop_revealed = true;
+			int current_round = h.current_round;
+			if (current_round>0 && h.decisions[current_round] == null) {
+				reveal_flop(h,current_round);
 			}
 			if (h.is_chance()) {
 				do_chance(h);
@@ -95,9 +118,16 @@ public class PlayLeduc_Big
 		calculate_payoff(h);	
 	}
 	
-	static void reveal_flop(HistoryNodeLeduc_Big h)
+	static void reveal_flop(HistoryNodeLeduc_Big h, int current_round)
 	{
-		System.out.println("Flop is revealed as " + h.flop_cards[0]);
+		if (current_round == 1) {
+			for (int i=0; i<FLOP_SIZE; i++){
+				System.out.println("community_card number " + String.valueOf(i+1)+ " is " + h.card_str(h.community_cards[i]));
+			}
+		}
+		else {
+			System.out.println("community_card number " + String.valueOf(current_round+1)+ " is " + h.card_str(h.community_cards[FLOP_SIZE + current_round-2]));
+		}
 	}
 	
 	static void do_chance(History h) 
@@ -105,8 +135,13 @@ public class PlayLeduc_Big
 		assert(h.is_chance());
 		ChanceNode h_chance = (ChanceNode)h;
 		h_chance.sample_outcome();
-		int card = ((HistoryNodeLeduc_Big)h).player_cards[player][0];
-		System.out.println("Player " + player + " your card is " + card);
+		System.out.print("Player " + player + " your cards are ");
+		for (int i=0; i<NUM_PLAYER_CARDS; i++) {
+			int card = ((HistoryNodeLeduc_Big)h).player_cards[player][i];
+			if (i>0) System.out.print(",");
+			System.out.print(((HistoryNodeLeduc_Big)h).card_str(card));
+		}
+		System.out.println(" ");
 	}
 	
 	static History do_player_turn(History h)
@@ -177,7 +212,13 @@ public class PlayLeduc_Big
 		double player_score = h_terminal.get_utility(player);
 		double computer_score = h_terminal.get_utility(1-player);
 		if (!((HistoryNodeLeduc_Big)h).decisions[((HistoryNodeLeduc_Big)h).current_round].endsWith("F")) {
-			System.out.println("Computer card is " + ((HistoryNodeLeduc_Big)h).player_cards[1-player][0]);
+			System.out.print("Computer cards are ");
+			for (int i=0; i<NUM_PLAYER_CARDS; i++) {
+				int card = ((HistoryNodeLeduc_Big)h).player_cards[1-player][i];
+				if (i>0) System.out.print(",");
+				System.out.print(((HistoryNodeLeduc_Big)h).card_str(card));
+			}
+			System.out.println(" ");
 		}
 		System.out.println("Round finished. Player recieved " + player_score + " points. Computer (player " + (1-player) + ") recieved " + computer_score + " points");
 		player_total_score += player_score;

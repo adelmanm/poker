@@ -6,11 +6,11 @@ public class AIvsAILeduc
 	public static final int NUM_PLAYERS = 2;
 	public static final int TOTAL_GAME_ACTIONS = 5;
 	public static final String log_dir_path = "logs/";
-	public static final String infoset_filename1 = "infosets_trim.csv";
-	public static final String infoset_filename0 = "infosets_vanilla.csv";
+	public static final String infoset_filename0 = "infosets.csv";
+	public static final String infoset_filename1 = "infosets_big.csv";
 	private static TreeMap<String,double[]> strategy_profile0 = new TreeMap<String,double[]>(); //<key, strategy>
 	private static TreeMap<String,double[]> strategy_profile1 = new TreeMap<String,double[]>(); //<key, strategy>
-	private static final int rounds = 10000000;
+	private static final int rounds = 10000;
 	private static double AI0_total_score = 0.0;
 	private static double AI1_total_score = 0.0;
 	private static final boolean print = false;
