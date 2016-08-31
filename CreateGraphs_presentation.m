@@ -1,8 +1,8 @@
 clear all;
 close all;
 INFOSETS_PATH = '..\logs\infosets.csv';
-ALGORITHMS_PATH = '..\logs\algorithms.csv';
-LOGS_PATH = '..\logs\';
+ALGORITHMS_PATH = '..\algorithms.csv';
+LOGS_PATH = '..\logs';
 %% plot informtion sets strategies - Kuhn
 ITERATION_GAP = 1;
 [~,~,raw]=xlsread(INFOSETS_PATH);
@@ -60,7 +60,7 @@ title('First player utilities');
 xlabel('Visited nodes');
 ylabel('utility');
 for i=1:N
-    util_path = strcat(LOGS_PATH, algorithms{i}, '_util_hist.csv');
+    util_path = strcat(LOGS_PATH,'_', algorithms{i}, '\util_hist.csv');
     [~,~,raw]=xlsread(util_path);
     util_data = cell2mat(raw(:,1));
     visited_nodes=cell2mat(raw(:,4));
