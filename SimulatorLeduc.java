@@ -16,7 +16,7 @@ public class SimulatorLeduc
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations =13;
+			num_iterations =10000;
 		}
 		else 
 		{
@@ -24,8 +24,9 @@ public class SimulatorLeduc
 		}
 		System.out.format("num_iterations is %d\n",num_iterations);
 		//TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
-		TrainCFR_CS trainer= new TrainCFR_CS();
+		//TrainCFR_CS trainer= new TrainCFR_CS();
 		//TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim();
+		TrainCFR_Vanilla_trim_old trainer= new TrainCFR_Vanilla_trim_old();
 		//TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
 		//TrainMCCFR trainer= new TrainMCCFR();
 		double utility[] = new double[NUM_PLAYERS];

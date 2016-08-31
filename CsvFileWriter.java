@@ -85,6 +85,7 @@ public class CsvFileWriter {
 	
 	public void write_game_settings(String filename, int num_players, int total_game_actions, int rounds, int deck_size, int num_player_cards, int num_suits, int hand_size, int flop_size, int ante, int[] bet_sum)
 	{
+		assert(bet_sum.length == rounds);
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true));
 			
