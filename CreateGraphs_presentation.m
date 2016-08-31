@@ -1,7 +1,8 @@
 clear all;
 close all;
-INFOSETS_PATH = 'logs\infosets.csv';
-LOGS_PATH = 'logs\';
+INFOSETS_PATH = '..\logs\infosets.csv';
+ALGORITHMS_PATH = '..\logs\algorithms.csv';
+LOGS_PATH = '..\logs\';
 %% plot informtion sets strategies - Kuhn
 ITERATION_GAP = 1;
 [~,~,raw]=xlsread(INFOSETS_PATH);
@@ -47,17 +48,26 @@ for i = 1:N
 end
 legend(infoset_legend{2:end});
 %% plot player utilities 
-ITERATION_GAP = 100; % 1 for Kuhn, 100 for Leduc
-util_path = strcat(LOGS_PATH,'util_hist.csv');
-util_data = importdata(util_path);
-figure(i+1);
+ITERATION_GAP = 1; % 1 for Kuhn, 100 for Leduc
+[~,~,algorithms]=xlsread(ALGORITHMS_PATH);
+% algorithms=raw(:,1);
+N = length(algorithms);
+
+algorithms_legend={0};
+figure;
 hold on;
-title('Player utilities');
-xlabel('iterations');
+title('First player utilities');
+xlabel('Visited nodes');
 ylabel('utility');
-iterations = (1:size(util_data,1))*ITERATION_GAP;
-plot(iterations,util_data,'LineWidth',1,'Marker','.','MarkerSize',20);
-legend('player0','player1');
-text(length(iterations)*ITERATION_GAP+20, util_data(end,1), num2str(util_data(end,1)),'FontSize',14);
-text(length(iterations)*ITERATION_GAP+20, util_data(end,2), num2str(util_data(end,2)),'FontSize',14);
-drawnow;
+for i=1:N
+    util_path = strcat(LOGS_PATH, algorithms{i}, '_util_hist.csv');
+    [~,~,raw]=xlsread(util_path);
+    util_data = cell2mat(raw(:,1));
+    visited_nodes=cell2mat(raw(:,4));
+
+    plot(visited_nodes,util_data,'LineWidth',1,'Marker','.','MarkerSize',20);
+    algorithms_legend{end+1}=algorithms{i};
+    text(visited_nodes(end)*(1.01), util_data(end,1), num2str(util_data(end,1)),'FontSize',14);
+    drawnow;
+end
+legend(algorithms_legend{2:end});
