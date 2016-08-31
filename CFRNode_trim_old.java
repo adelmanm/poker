@@ -1,6 +1,6 @@
 import java.util.Arrays;
 
-public class CFRNode_trim {
+public class CFRNode_trim_old {
 	private double[][] regretSum;
 	private double[] strategy;
 	private double[][] strategySum;
@@ -17,7 +17,6 @@ public class CFRNode_trim {
 	private boolean[] trim;
 	private double[] mean_square_est; //sums the square of the averege utilities
 	private double[] mean_est; //sums the averege utilities
-	private double[] pi_sum; //sum of the each player reach probabilities, used for a proper calculation of average utility  
 	
 	public void Print() {
 	    System.out.println(Arrays.toString(getAverageStrategy()));
@@ -25,7 +24,7 @@ public class CFRNode_trim {
 	
 	
 	
-	CFRNode_trim(DecisionNode h){
+	CFRNode_trim_old(DecisionNode h){
 		total_game_actions = h.total_game_actions();
 		num_valid_actions = h.num_valid_actions();
 		regretSum = new double[iteration_mod][total_game_actions];
@@ -41,14 +40,12 @@ public class CFRNode_trim {
 		total_utility = new double[NUM_PLAYERS];
 		mean_square_est = new double[NUM_PLAYERS];
 		mean_est = new double[NUM_PLAYERS];
-		pi_sum = new double[NUM_PLAYERS];
 		for (int i=0; i< NUM_PLAYERS; i++){
 			utility_history_counter[i] = 0;
 			total_utility[i] = 0;
 			trim[i] = false;
 			mean_square_est[i] = 0;
 			mean_est[i] = 0;
-			pi_sum[i] = 0.0;
 		}
 	}
 	public void updateTables(int player, int index, double regret, double pi0, double pi1, int current_iteration) {
@@ -66,16 +63,15 @@ public class CFRNode_trim {
 		regretSum[next_next_iteration_mod][index] = regretSum[next_iteration_mod][index];
 		strategySum[next_next_iteration_mod][index] = strategySum[next_iteration_mod][index];
 	}
-	public void updateUtility(double utility, int player, double pi){
+	public void updateUtility(double utility, int player){
 		utility_history_counter[player]++;
-		pi_sum[player] += pi;
-		total_utility[player] += pi*utility;
+		total_utility[player] = total_utility[player] + utility;
 		double mean = get_mean(player);
 		mean_square_est[player] += mean*mean;
 		mean_est[player] += mean;
 		if (utility_history_counter[player] % UTILITY_HISTORY_LENGTH == 0) {
 			double var = get_var(player);
-			if (var < CUTOFF_THRESHOLD) {
+			if (get_var(player) < CUTOFF_THRESHOLD) {
 				trim[player] = true;
 			}
 			else {
@@ -90,8 +86,8 @@ public class CFRNode_trim {
 		else return false;
 	}
 	
-	public double get_mean(int player) { //returns average utility
-		return total_utility[player] / pi_sum[player];
+	public double get_mean(int player) { //returns avegare utility
+		return total_utility[player] / utility_history_counter[player];
 	}
 	
 	public double get_mean_est(int player) { //returns the average of the average utilities

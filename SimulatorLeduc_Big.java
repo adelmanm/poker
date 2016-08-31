@@ -5,18 +5,19 @@ public class SimulatorLeduc_Big
 {
 	public static final int NUM_PLAYERS = 2;		//2 in standard leduc. number of players/
 	public static final int TOTAL_GAME_ACTIONS = 5; //5 in standard leduc. total number of different actions in the game
-	public static final int ROUNDS=2; 				//2 in standard leduc. number of betting rounds, including the first blind one.
-	public static final int DECK_SIZE=6;  			//6 in standard leduc. total number of cards
+	public static final int ROUNDS=3; 				//2 in standard leduc. number of betting rounds, including the first blind one.
+	public static final int DECK_SIZE=8;  			//6 in standard leduc. total number of cards
 	public static final int NUM_PLAYER_CARDS = 1;	//1 in standard leduc. number of cards per player
 	public static final int NUM_SUITS = 2;			//2 in standard leduc. number of different card suits (cards with the same number)
 	public static final int HAND_SIZE = 2;			//2 in standard leduc. size of the poker hand (can be composed from player and community cards)
 	public static final int FLOP_SIZE = 1;			//1 in standard leduc. number of community cards revealed after the first round (only 1 card in later rounds)
 	public static final int ANTE = 1;				//1 in standard leduc. the money each player pays at the beginning of the game
-	public static final int[] BET_SUM  = {1,1};		//{1,1} in standard leduc. amount of bet per round.
+	public static final int[] BET_SUM  = {1,1,1};		//{1,1} in standard leduc. amount of bet per round.
 	public static final String log_dir_path = "logs/";
 	public static final String game_settings_fliename = "game_settings.csv";
 	public static final int ITERAION_GAP = 1;
 	public static final boolean UPDATE_STRATEGY_CSV = false;
+	public static final boolean UPDATE_UTILITY_CSV = true;
 	
 	public static void main(String[] args) // function Solve in the algorithm.
 	{
@@ -26,17 +27,18 @@ public class SimulatorLeduc_Big
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations =2;
+			num_iterations =100;
 		}
 		else 
 		{
 			num_iterations = Integer.valueOf(args[0]);
 		}
 		System.out.format("num_iterations is %d\n",num_iterations);
-		TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
+		//TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
 		//TrainCFR_CS trainer= new TrainCFR_CS();
-		//TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim();
-		//TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
+		//TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim(); //weighted averaging. not working perfectly
+		//TrainCFR_Vanilla_trim_old trainer= new TrainCFR_Vanilla_trim_old(); //every utility has same weight. currently working
+		TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
 		//TrainMCCFR trainer= new TrainMCCFR();
 		double utility[] = new double[NUM_PLAYERS];
 		double utility_avg[] = new double[NUM_PLAYERS];
@@ -49,8 +51,11 @@ public class SimulatorLeduc_Big
 			}
 			if (iteration % ITERAION_GAP == 0) {
 				System.out.println("iterations passed: " + iteration);
+				System.out.println("total decision nodes visited: " + VisitedNodesCounter.to_String());
 				if (UPDATE_STRATEGY_CSV == true) {
 					trainer.update_strategy_csv(log_dir_path);
+				}
+				if (UPDATE_UTILITY_CSV == true) {
 					for (int j=0;j<NUM_PLAYERS;j++){
 						utility_avg[j] = utility[j] / (iteration+1);
 					}
