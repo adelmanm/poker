@@ -1,10 +1,13 @@
 /* Implementation of the CFR algorithm - Vanilla version */
 import java.util.*;
-public class TrainCFR_Vanilla_trim {
+public class TrainCFR_Vanilla_trim_prune {
 	private TreeMap<String,CFRNode_trim> nodemap = new TreeMap<String,CFRNode_trim>(); //<key, information set data>
 	static CsvFileWriter CsvWriter = new CsvFileWriter();
 	
 	public double cfr(History h, int player, int iteration, double pi0, double pi1) {
+		
+		//Pruning optimization
+		if (pi0 == 0.0 && pi1 == 0.0) return 0.0;
 		
 		//Return payoff for terminal states
 		if (h.is_terminal()) {

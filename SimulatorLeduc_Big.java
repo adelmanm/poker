@@ -15,7 +15,7 @@ public class SimulatorLeduc_Big
 	public static final int[] BET_SUM  = {1,1,1};		//{1,1} in standard leduc. amount of bet per round.
 	public static final String log_dir_path = "logs/";
 	public static final String game_settings_fliename = "game_settings.csv";
-	public static final int ITERAION_GAP = 1;
+	public static final int ITERAION_GAP = 50;
 	public static final boolean UPDATE_STRATEGY_CSV = false;
 	public static final boolean UPDATE_UTILITY_CSV = true;
 	
@@ -27,7 +27,7 @@ public class SimulatorLeduc_Big
 		int num_iterations;
 		if (args.length == 0) 
 		{
-			num_iterations =100;
+			num_iterations =10000000;
 		}
 		else 
 		{
@@ -36,13 +36,17 @@ public class SimulatorLeduc_Big
 		System.out.format("num_iterations is %d\n",num_iterations);
 		//TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
 		//TrainCFR_CS trainer= new TrainCFR_CS();
-		//TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim(); //weighted averaging. not working perfectly
-		//TrainCFR_Vanilla_trim_old trainer= new TrainCFR_Vanilla_trim_old(); //every utility has same weight. currently working
-		TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
+		//TrainCFR_Vanilla_trim_weighted trainer= new TrainCFR_Vanilla_trim_weighted(); //weighted averaging. not working perfectly
+		//TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim(); //every utility has same weight. currently working
+		//TrainCFR_Vanilla_trim_prune trainer= new TrainCFR_Vanilla_trim_prune();
+		//TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
 		//TrainMCCFR trainer= new TrainMCCFR();
+		TrainMCCFR_trim trainer= new TrainMCCFR_trim();
 		double utility[] = new double[NUM_PLAYERS];
 		double utility_avg[] = new double[NUM_PLAYERS];
-		for (int iteration = 0; iteration < num_iterations; iteration++)
+		int num_visited_nodes[] = new int[2];
+		int iteration;
+		for (iteration = 0; iteration < num_iterations; iteration++)
 		{
 			for (int player=0;player < NUM_PLAYERS;player++)
 			{
@@ -50,7 +54,7 @@ public class SimulatorLeduc_Big
 				utility[player] += trainer.cfr(h,player,iteration,1.0,1.0);
 			}
 			if (iteration % ITERAION_GAP == 0) {
-				System.out.println("iterations passed: " + iteration);
+				System.out.println("iterations passed: " + (iteration+1));
 				System.out.println("total decision nodes visited: " + VisitedNodesCounter.to_String());
 				if (UPDATE_STRATEGY_CSV == true) {
 					trainer.update_strategy_csv(log_dir_path);
@@ -59,10 +63,13 @@ public class SimulatorLeduc_Big
 					for (int j=0;j<NUM_PLAYERS;j++){
 						utility_avg[j] = utility[j] / (iteration+1);
 					}
-					
 					CsvWriter.write(log_dir_path + "util_hist.csv", utility_avg[0] + "," +utility_avg[1] + "," + String.valueOf(iteration) + ","+   VisitedNodesCounter.to_String());
 				}
 			}
+			
+			//stop if no nodes were visited on this iteration (convergence for prune/trim)
+			num_visited_nodes[iteration%2] = VisitedNodesCounter.value();
+			if(num_visited_nodes[iteration%2] == num_visited_nodes[(iteration+1)%2]) break;
 			
 		}
 		CsvWriter.flush_close();
@@ -70,8 +77,9 @@ public class SimulatorLeduc_Big
 		trainer.print();
 		for (int j=0;j<NUM_PLAYERS;j++){
 			System.out.print("player " + String.valueOf(j) + " utility:");
-			System.out.println(utility[j] / num_iterations);
+			System.out.println(utility[j] / iteration);
 		}
+		System.out.println("total iterations performed: " + iteration);
 		System.out.println("total decision nodes visited: " + VisitedNodesCounter.to_String());
 	}
 	static void create_logs_dir()

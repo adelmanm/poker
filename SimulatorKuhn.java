@@ -25,7 +25,7 @@ public class SimulatorKuhn
 		System.out.format("num_iterations is %d\n",num_iterations);
 		//TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
 		//TrainCFR_CS trainer= new TrainCFR_CS();
-		TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim();
+		TrainCFR_Vanilla_trim_weighted trainer= new TrainCFR_Vanilla_trim_weighted();
 		//TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
 		//TrainMCCFR trainer= new TrainMCCFR();
 		double utility[] = new double[NUM_PLAYERS];
@@ -44,7 +44,7 @@ public class SimulatorKuhn
 					for (int j=0;j<NUM_PLAYERS;j++){
 						utility_avg[j] = utility[j] / (iteration+1);
 					}
-					CsvWriter.write(log_dir_path + "util_hist.csv", utility_avg);
+					CsvWriter.write(log_dir_path + "util_hist.csv", utility_avg[0] + "," +utility_avg[1] + "," + String.valueOf(iteration) + ","+   VisitedNodesCounter.to_String());
 				}
 			}
 			

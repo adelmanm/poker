@@ -1,6 +1,6 @@
 import java.util.Arrays;
 
-public class CFRNode_trim {
+public class CFRNode_trim_weighted {
 	private double[][] regretSum;
 	private double[] strategy;
 	private double[][] strategySum;
@@ -9,7 +9,7 @@ public class CFRNode_trim {
 	private int num_valid_actions; //number of actions in this information set.
 	private final int iteration_mod = 3; //has to be at least 2 to allow updating only for the next iteration
 	private int current_iteration_mod_pointer = 0;
-	public static final int UTILITY_HISTORY_LENGTH = 2000000;
+	public static final int UTILITY_HISTORY_LENGTH = 5000;
 	public static final double CUTOFF_THRESHOLD = 0.01;
 	public static final int NUM_PLAYERS = 2;
 	private double total_utility[];
@@ -17,6 +17,7 @@ public class CFRNode_trim {
 	private boolean[] trim;
 	private double[] mean_square_est; //sums the square of the averege utilities
 	private double[] mean_est; //sums the averege utilities
+	private double[] pi_sum; //sum of the each player reach probabilities, used for a proper calculation of average utility  
 	
 	public void Print() {
 	    System.out.println(Arrays.toString(getAverageStrategy()));
@@ -24,7 +25,7 @@ public class CFRNode_trim {
 	
 	
 	
-	CFRNode_trim(DecisionNode h){
+	CFRNode_trim_weighted(DecisionNode h){
 		total_game_actions = h.total_game_actions();
 		num_valid_actions = h.num_valid_actions();
 		regretSum = new double[iteration_mod][total_game_actions];
@@ -40,12 +41,14 @@ public class CFRNode_trim {
 		total_utility = new double[NUM_PLAYERS];
 		mean_square_est = new double[NUM_PLAYERS];
 		mean_est = new double[NUM_PLAYERS];
+		pi_sum = new double[NUM_PLAYERS];
 		for (int i=0; i< NUM_PLAYERS; i++){
 			utility_history_counter[i] = 0;
 			total_utility[i] = 0;
 			trim[i] = false;
 			mean_square_est[i] = 0;
 			mean_est[i] = 0;
+			pi_sum[i] = 0.0;
 		}
 	}
 	public void updateTables(int player, int index, double regret, double pi0, double pi1, int current_iteration) {
@@ -63,15 +66,16 @@ public class CFRNode_trim {
 		regretSum[next_next_iteration_mod][index] = regretSum[next_iteration_mod][index];
 		strategySum[next_next_iteration_mod][index] = strategySum[next_iteration_mod][index];
 	}
-	public void updateUtility(double utility, int player){
+	public void updateUtility(double utility, int player, double pi){
 		utility_history_counter[player]++;
-		total_utility[player] = total_utility[player] + utility;
+		pi_sum[player] += pi;
+		total_utility[player] += pi*utility;
 		double mean = get_mean(player);
 		mean_square_est[player] += mean*mean;
 		mean_est[player] += mean;
 		if (utility_history_counter[player] % UTILITY_HISTORY_LENGTH == 0) {
 			double var = get_var(player);
-			if (get_var(player) < CUTOFF_THRESHOLD) {
+			if (var < CUTOFF_THRESHOLD) {
 				trim[player] = true;
 			}
 			else {
@@ -86,8 +90,8 @@ public class CFRNode_trim {
 		else return false;
 	}
 	
-	public double get_mean(int player) { //returns avegare utility
-		return total_utility[player] / utility_history_counter[player];
+	public double get_mean(int player) { //returns average utility
+		return total_utility[player] / pi_sum[player];
 	}
 	
 	public double get_mean_est(int player) { //returns the average of the average utilities
