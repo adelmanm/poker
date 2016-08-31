@@ -6,7 +6,7 @@ public class SimulatorLeduc_Big
 	public static final int NUM_PLAYERS = 2;		//2 in standard leduc. number of players/
 	public static final int TOTAL_GAME_ACTIONS = 5; //5 in standard leduc. total number of different actions in the game
 	public static final int ROUNDS=3; 				//2 in standard leduc. number of betting rounds, including the first blind one.
-	public static final int DECK_SIZE=8;  			//6 in standard leduc. total number of cards
+	public static final int DECK_SIZE=10;  			//6 in standard leduc. total number of cards
 	public static final int NUM_PLAYER_CARDS = 1;	//1 in standard leduc. number of cards per player
 	public static final int NUM_SUITS = 2;			//2 in standard leduc. number of different card suits (cards with the same number)
 	public static final int HAND_SIZE = 2;			//2 in standard leduc. size of the poker hand (can be composed from player and community cards)
@@ -15,7 +15,7 @@ public class SimulatorLeduc_Big
 	public static final int[] BET_SUM  = {1,1,1};		//{1,1} in standard leduc. amount of bet per round.
 	public static final String log_dir_path = "logs/";
 	public static final String game_settings_fliename = "game_settings.csv";
-	public static final int ITERAION_GAP = 50;
+	public static final int ITERAION_GAP = 1;
 	public static final boolean UPDATE_STRATEGY_CSV = false;
 	public static final boolean UPDATE_UTILITY_CSV = true;
 	
@@ -24,27 +24,19 @@ public class SimulatorLeduc_Big
 		CsvFileWriter CsvWriter = new CsvFileWriter();
 		create_logs_dir();
 		write_game_settings(CsvWriter);
-		int num_iterations;
-		if (args.length == 0) 
-		{
-			num_iterations =10000000;
-		}
-		else 
-		{
-			num_iterations = Integer.valueOf(args[0]);
-		}
-		System.out.format("num_iterations is %d\n",num_iterations);
-		//TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
+		TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
 		//TrainCFR_CS trainer= new TrainCFR_CS();
 		//TrainCFR_Vanilla_trim_weighted trainer= new TrainCFR_Vanilla_trim_weighted(); //weighted averaging. not working perfectly
 		//TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim(); //every utility has same weight. currently working
 		//TrainCFR_Vanilla_trim_prune trainer= new TrainCFR_Vanilla_trim_prune();
 		//TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
 		//TrainMCCFR trainer= new TrainMCCFR();
-		TrainMCCFR_trim trainer= new TrainMCCFR_trim();
+		//TrainMCCFR_trim trainer= new TrainMCCFR_trim();
 		double utility[] = new double[NUM_PLAYERS];
 		double utility_avg[] = new double[NUM_PLAYERS];
 		int num_visited_nodes[] = new int[2];
+		int num_iterations = 100000000;
+		int max_visited_nodes = 50000000; //-1 for no restriction
 		int iteration;
 		for (iteration = 0; iteration < num_iterations; iteration++)
 		{
@@ -70,6 +62,7 @@ public class SimulatorLeduc_Big
 			//stop if no nodes were visited on this iteration (convergence for prune/trim)
 			num_visited_nodes[iteration%2] = VisitedNodesCounter.value();
 			if(num_visited_nodes[iteration%2] == num_visited_nodes[(iteration+1)%2]) break;
+			if (max_visited_nodes > 0 && max_visited_nodes < num_visited_nodes[iteration%2]) break;
 			
 		}
 		CsvWriter.flush_close();

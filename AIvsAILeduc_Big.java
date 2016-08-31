@@ -5,8 +5,8 @@ public class AIvsAILeduc_Big
 {
 	public static final int NUM_GAME_SETTINGS = 10;
 	public static final String log_dir_path = "logs/";
-	public static final String infoset_filename0 = "infosets.csv";
-	public static final String infoset_filename1 = "infosets.csv";
+	public static final String infoset_filename0 = "vanilla.csv";
+	public static final String infoset_filename1 = "mccfr_trim.csv";
 	public static final String game_settings_fliename = "game_settings.csv";
 	private static int NUM_PLAYER_CARDS; //number of cards per player
 	private static int FLOP_SIZE; // number of community cards revealed in the first flop
@@ -29,12 +29,12 @@ public class AIvsAILeduc_Big
 				System.out.println("AI0 is the starting player");
 			}
 			play_round(0);
-			/*
+			///*
 			if (print == true) {
 				System.out.println("AI1 is the starting player");
 			}
 			play_round(1);
-			*/
+			//*/
 		}
 		check_winner();
 	}

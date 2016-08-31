@@ -9,8 +9,8 @@ public class MCCFRNode_trim {
 	private int num_valid_actions; //number of actions in this information set.
 	private final int iteration_mod = 3; //has to be at least 2 to allow updating only for the next iteration
 	private int current_iteration_mod_pointer = 0;
-	public static final int UTILITY_HISTORY_LENGTH = 50;
-	public static final double CUTOFF_THRESHOLD = 0.01;
+	public static final int UTILITY_HISTORY_LENGTH = 500;
+	public static final double CUTOFF_THRESHOLD = 0.0001;
 	public static final int NUM_PLAYERS = 2;
 	private double total_utility[];
 	private int utility_history_counter[];
@@ -62,7 +62,9 @@ public class MCCFRNode_trim {
 		mean_est[player] += mean;
 		if (utility_history_counter[player] % UTILITY_HISTORY_LENGTH == 0) {
 			double var = get_var(player);
-			if (get_var(player) < CUTOFF_THRESHOLD) {
+			//double cutoff = get_mean_est(player)/1000;
+			if (var < CUTOFF_THRESHOLD) {
+			//if (var < cutoff*cutoff) {
 				trim[player] = true;
 			}
 			else {
