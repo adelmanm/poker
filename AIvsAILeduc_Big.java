@@ -12,7 +12,7 @@ public class AIvsAILeduc_Big
 	private static int FLOP_SIZE; // number of community cards revealed in the first flop
 	private static TreeMap<String,double[]> strategy_profile0 = new TreeMap<String,double[]>(); //<key, strategy>
 	private static TreeMap<String,double[]> strategy_profile1 = new TreeMap<String,double[]>(); //<key, strategy>
-	private static final int rounds = 100000;
+	private static final int rounds = 1000000;
 	private static String[] settings_name = new String[NUM_GAME_SETTINGS];
 	private static int[] settings_value = new int[NUM_GAME_SETTINGS];
 	private static double AI0_total_score = 0.0;

@@ -5,6 +5,10 @@ public class VisitedNodesCounter
 	{
 		num_nodes_visited++;
 	}
+	public static int value()
+	{
+		return num_nodes_visited;
+	}
 	public static String to_String()
 	{
 		return String.valueOf(num_nodes_visited);

@@ -1,7 +1,7 @@
 /* Implementation of the CFR algorithm - Vanilla version */
 import java.util.*;
-public class TrainCFR_Vanilla_trim {
-	private TreeMap<String,CFRNode_trim> nodemap = new TreeMap<String,CFRNode_trim>(); //<key, information set data>
+public class TrainCFR_Vanilla_trim_weighted {
+	private TreeMap<String,CFRNode_trim_weighted> nodemap = new TreeMap<String,CFRNode_trim_weighted>(); //<key, information set data>
 	static CsvFileWriter CsvWriter = new CsvFileWriter();
 	
 	public double cfr(History h, int player, int iteration, double pi0, double pi1) {
@@ -31,9 +31,9 @@ public class TrainCFR_Vanilla_trim {
 		DecisionNode h_decision = (DecisionNode)h;
 		int total_game_actions = h_decision.total_game_actions();
 		String infoset_key = h_decision.get_information_set();
-		CFRNode_trim infoset_node = nodemap.get(infoset_key);
+		CFRNode_trim_weighted infoset_node = nodemap.get(infoset_key);
 		if (infoset_node == null) {
-			infoset_node = new CFRNode_trim(h_decision);
+			infoset_node = new CFRNode_trim_weighted(h_decision);
 			nodemap.put(infoset_key, infoset_node);
 		}
 		
@@ -70,7 +70,8 @@ public class TrainCFR_Vanilla_trim {
 			}
 		}
 		
-		infoset_node.updateUtility(total_node_utility,player);
+		double pi = player == 0 ? pi0: pi1;
+		infoset_node.updateUtility(total_node_utility,player,pi);
 		return total_node_utility;
 	}
 
@@ -82,7 +83,7 @@ public class TrainCFR_Vanilla_trim {
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
 	         System.out.print(me.getKey() + ": ");
-	         CFRNode_trim tmpNode=(CFRNode_trim)me.getValue();
+	         CFRNode_trim_weighted tmpNode=(CFRNode_trim_weighted)me.getValue();
 	         tmpNode.Print();
 	      }
 	}
@@ -93,7 +94,7 @@ public class TrainCFR_Vanilla_trim {
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
-	         CFRNode_trim tmpNode=(CFRNode_trim)me.getValue();
+	         CFRNode_trim_weighted tmpNode=(CFRNode_trim_weighted)me.getValue();
 	         String filename =  log_dir_path + me.getKey() + "_strategy.csv";
 	         double strategy[] = tmpNode.getAverageStrategy();
 	         CsvWriter.write(filename, strategy);
@@ -106,7 +107,7 @@ public class TrainCFR_Vanilla_trim {
 		Iterator i = set.iterator();
 	    while(i.hasNext()) {
 	         Map.Entry me = (Map.Entry)i.next();
-	         CFRNode_trim tmpNode = (CFRNode_trim)me.getValue();
+	         CFRNode_trim_weighted tmpNode = (CFRNode_trim_weighted)me.getValue();
 	         double strategy[] = tmpNode.getAverageStrategy();
 	         String filename =  log_dir_path + "infosets.csv";
 	         CsvWriter.write(filename, me.getKey().toString(), strategy);  
