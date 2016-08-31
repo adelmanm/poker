@@ -13,27 +13,19 @@ public class SimulatorLeduc
 	{
 		CsvFileWriter CsvWriter = new CsvFileWriter();
 		create_logs_dir();
-		int num_iterations;
-		if (args.length == 0) 
-		{
-			num_iterations =1000000;
-		}
-		else 
-		{
-			num_iterations = Integer.valueOf(args[0]);
-		}
-		System.out.format("num_iterations is %d\n",num_iterations);
 		//TrainCFR_Vanilla trainer= new TrainCFR_Vanilla();
 		//TrainCFR_CS trainer= new TrainCFR_CS();
 		//TrainCFR_Vanilla_trim_weighted trainer= new TrainCFR_Vanilla_trim_weighted(); //weighted averaging. not working perfectly
 		//TrainCFR_Vanilla_trim trainer= new TrainCFR_Vanilla_trim(); //every utility has same weight. currently working
 		//TrainCFR_Vanilla_trim_prune trainer= new TrainCFR_Vanilla_trim_prune();
-		//TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
+		TrainCFR_Vanilla_prune trainer= new TrainCFR_Vanilla_prune();
 		//TrainMCCFR trainer= new TrainMCCFR();
-		TrainMCCFR_trim trainer= new TrainMCCFR_trim();
+		//TrainMCCFR_trim trainer= new TrainMCCFR_trim();
 		double utility[] = new double[NUM_PLAYERS];
 		double utility_avg[] = new double[NUM_PLAYERS];
 		int num_visited_nodes[] = new int[2];
+		int num_iterations = 1000000;
+		int max_visited_nodes = 757916; //-1 for no restriction
 		int iteration;
 		for (iteration = 0; iteration < num_iterations; iteration++)
 		{
@@ -57,6 +49,7 @@ public class SimulatorLeduc
 			//stop if no nodes were visited on this iteration (convergence for prune/trim)
 			num_visited_nodes[iteration%2] = VisitedNodesCounter.value();
 			if(num_visited_nodes[iteration%2] == num_visited_nodes[(iteration+1)%2]) break;
+			if (max_visited_nodes > 0 && max_visited_nodes < num_visited_nodes[iteration%2]) break;
 		}
 		CsvWriter.flush_close();
 		trainer.create_infoset_csv(log_dir_path);
