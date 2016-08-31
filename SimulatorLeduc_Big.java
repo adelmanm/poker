@@ -59,7 +59,8 @@ public class SimulatorLeduc_Big
 					for (int j=0;j<NUM_PLAYERS;j++){
 						utility_avg[j] = utility[j] / (iteration+1);
 					}
-					CsvWriter.write(log_dir_path + "util_hist.csv", utility_avg);
+					
+					CsvWriter.write(log_dir_path + "util_hist.csv", utility_avg[0] + "," +utility_avg[1] + "," + String.valueOf(iteration) + ","+   VisitedNodesCounter.to_String());
 				}
 			}
 			
