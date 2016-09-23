@@ -17,6 +17,7 @@ public class MCCFRNode_trim {
 	private boolean[] trim;
 	private double[] mean_square_est; //sums the square of the averege utilities
 	private double[] mean_est; //sums the averege utilities
+	private static final double TRIM_EPSILON = 1; //probability that a node will be trimmed if stable
 	
 	public void Print() {
 	    System.out.println(Arrays.toString(getAverageStrategy()));
@@ -75,8 +76,11 @@ public class MCCFRNode_trim {
 	}
 	
 	public boolean can_trim(int player) {
-		if (trim[player] == true) return true;
-		else return false;
+		if (trim[player] == true) {
+			if(Math.random() < TRIM_EPSILON) return true;
+			else trim[player] = false;
+		}
+		return false;
 	}
 	
 	public double get_mean(int player) { //returns avegare utility
